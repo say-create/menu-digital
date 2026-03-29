@@ -3,11 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Smash House</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <style>
 body { background: #0f0f0f; }
@@ -17,139 +15,164 @@ body { background: #0f0f0f; }
 <body class="text-white font-sans">
 
 <!-- HEADER -->
-<div class="p-4 text-center text-2xl font-bold bg-black shadow">
-🍔 Smash House
-<p class="text-sm text-gray-400">Ordena fácil y rápido 🔥</p>
+<div class="p-4 text-center bg-black shadow">
+<h1 class="text-2xl font-bold">🍔 Smash House</h1>
+<p class="text-gray-400 text-sm">Las burgers más brutales 🔥</p>
+</div>
+
+<!-- INFO NEGOCIO -->
+<div class="p-4 text-sm text-gray-300">
+📍 Av. Siempre Viva 123, Ecatepec  
+<br>⏰ Lunes a Domingo: 2:00 PM - 11:00 PM  
+</div>
+
+<!-- RESEÑAS -->
+<div class="px-4 pb-2">
+<p class="text-yellow-400">⭐⭐⭐⭐⭐ 4.8 (250 reseñas)</p>
+<p class="text-gray-400 text-sm">“Las mejores hamburguesas 🔥”</p>
 </div>
 
 <!-- CATEGORÍAS -->
-<div class="flex overflow-x-auto gap-3 p-3">
-  <button onclick="filter('all')" class="bg-yellow-500 px-4 py-2 rounded-full">Todo</button>
-  <button onclick="filter('burger')" class="bg-gray-800 px-4 py-2 rounded-full">🍔 Burgers</button>
-  <button onclick="filter('papas')" class="bg-gray-800 px-4 py-2 rounded-full">🍟 Papas</button>
-  <button onclick="filter('bebidas')" class="bg-gray-800 px-4 py-2 rounded-full">🥤 Bebidas</button>
+<div class="flex overflow-x-auto gap-2 p-3">
+<button onclick="filter('all')" class="bg-yellow-500 px-3 py-1 rounded-full">Todo</button>
+<button onclick="filter('burger')" class="bg-gray-800 px-3 py-1 rounded-full">🍔 Burgers</button>
+<button onclick="filter('papas')" class="bg-gray-800 px-3 py-1 rounded-full">🍟 Papas</button>
+<button onclick="filter('bebidas')" class="bg-gray-800 px-3 py-1 rounded-full">🥤 Bebidas</button>
+<button onclick="filter('postres')" class="bg-gray-800 px-3 py-1 rounded-full">🍰 Postres</button>
+<button onclick="filter('combos')" class="bg-gray-800 px-3 py-1 rounded-full">🔥 Combos</button>
 </div>
 
 <!-- PRODUCTOS -->
 <div id="products" class="p-4 grid gap-4"></div>
 
-<!-- BOTÓN FLOTANTE -->
+<!-- BOTÓN CARRITO -->
 <div class="fixed bottom-20 right-5">
-  <button onclick="toggleCart()" class="bg-green-500 p-4 rounded-full shadow-lg">
-    🛒 <span id="count">0</span>
-  </button>
+<button onclick="toggleCart()" class="bg-green-500 p-4 rounded-full shadow-lg">
+🛒 <span id="count">0</span>
+</button>
 </div>
 
 <!-- CARRITO -->
 <div id="cartPanel" class="fixed bottom-0 left-0 right-0 bg-black p-4 hidden">
-  <h2 class="text-lg mb-2">Tu pedido</h2>
-  <div id="cartItems" class="text-sm mb-2"></div>
-  <div class="flex justify-between mb-2">
-    <span>Total:</span>
-    <span id="total">$0</span>
-  </div>
-  <button onclick="sendWhatsApp()" class="bg-green-500 w-full py-2 rounded-lg mb-2">
-    Enviar pedido 📲
-  </button>
+<h2 class="text-lg mb-2">Tu pedido</h2>
+<div id="cartItems" class="text-sm mb-2"></div>
+<div class="flex justify-between mb-2">
+<span>Total:</span>
+<span id="total">$0</span>
 </div>
-
-<!-- QR -->
-<div class="p-4 text-center">
-  <p class="text-gray-400 mb-2">Escanea para ver el menú</p>
-  <div id="qrcode" class="mx-auto"></div>
+<button onclick="sendWhatsApp()" class="bg-green-500 w-full py-2 rounded-lg">
+Enviar pedido 📲
+</button>
 </div>
 
 <script>
+
 let products = [
-  {name: "Smash Clásica", price: 85, category: "burger"},
-  {name: "Doble Smash", price: 120, category: "burger"},
-  {name: "Papas con queso", price: 65, category: "papas"},
-  {name: "Refresco", price: 25, category: "bebidas"},
+
+{name:"Smash Clásica",price:85,category:"burger",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd"},
+{name:"Doble Smash",price:120,category:"burger",img:"https://images.unsplash.com/photo-1550547660-d9450f859349"},
+{name:"BBQ Bacon",price:130,category:"burger",img:"https://images.unsplash.com/photo-1606755962773-d324e0a13086"},
+{name:"Cheese Burger",price:95,category:"burger",img:"https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5"},
+{name:"Monster Burger",price:150,category:"burger",img:"https://images.unsplash.com/photo-1600891964599-f61ba0e24092"},
+
+{name:"Papas clásicas",price:50,category:"papas",img:"https://images.unsplash.com/photo-1576107232684-1279f390859f"},
+{name:"Papas con queso",price:65,category:"papas",img:"https://images.unsplash.com/photo-1585238342028-4c4bdfd0c4d3"},
+{name:"Papas BBQ",price:70,category:"papas",img:"https://images.unsplash.com/photo-1586190848861-99aa4a171e90"},
+{name:"Papas supremas",price:85,category:"papas",img:"https://images.unsplash.com/photo-1606755456206-b25206cde27e"},
+
+{name:"Refresco",price:25,category:"bebidas",img:"https://images.unsplash.com/photo-1581006852262-e4307cf6283a"},
+{name:"Agua",price:20,category:"bebidas",img:"https://images.unsplash.com/photo-1523362628745-0c100150b504"},
+{name:"Malteada chocolate",price:60,category:"bebidas",img:"https://images.unsplash.com/photo-1572490122747-3968b75cc699"},
+{name:"Malteada fresa",price:60,category:"bebidas",img:"https://images.unsplash.com/photo-1551024601-bec78aea704b"},
+
+{name:"Brownie",price:45,category:"postres",img:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c"},
+{name:"Cheesecake",price:55,category:"postres",img:"https://images.unsplash.com/photo-1578985545062-69928b1d9587"},
+{name:"Donas",price:35,category:"postres",img:"https://images.unsplash.com/photo-1509042239860-f550ce710b93"},
+{name:"Helado",price:40,category:"postres",img:"https://images.unsplash.com/photo-1563805042-7684c019e1cb"},
+
+{name:"Combo Clásico",price:150,category:"combos",img:"https://images.unsplash.com/photo-1600891964599-f61ba0e24092"},
+{name:"Combo Doble",price:180,category:"combos",img:"https://images.unsplash.com/photo-1550547660-d9450f859349"},
+{name:"Combo Familiar",price:320,category:"combos",img:"https://images.unsplash.com/photo-1562967916-eb82221dfb92"},
+{name:"Combo Pareja",price:250,category:"combos",img:"https://images.unsplash.com/photo-1606755962773-d324e0a13086"}
+
 ];
 
 let cart = [];
 
-function renderProducts(filterCategory = "all") {
-  let container = document.getElementById("products");
-  container.innerHTML = "";
+function renderProducts(cat="all"){
+let container=document.getElementById("products");
+container.innerHTML="";
 
-  products.forEach(p => {
-    if (filterCategory === "all" || p.category === filterCategory) {
-      container.innerHTML += `
-      <div class="bg-gray-900 p-4 rounded-xl transform hover:scale-105 transition duration-300">
-        <h3 class="text-lg font-bold">${p.name}</h3>
-        <p class="text-yellow-400">$${p.price}</p>
-        <button onclick="addToCart('${p.name}', ${p.price})"
-        class="mt-2 bg-green-500 px-3 py-1 rounded">
-        Agregar +
-        </button>
-      </div>`;
-    }
-  });
+products.forEach(p=>{
+if(cat==="all"||p.category===cat){
+container.innerHTML+=`
+<div class="bg-gray-900 rounded-xl overflow-hidden transform hover:scale-105 transition duration-300">
+<img src="${p.img}" class="w-full h-40 object-cover">
+<div class="p-3">
+<h3 class="text-lg font-bold">${p.name}</h3>
+<p class="text-yellow-400">$${p.price}</p>
+<button onclick="addToCart('${p.name}',${p.price})"
+class="mt-2 bg-green-500 px-3 py-1 rounded w-full">
+Agregar +
+</button>
+</div>
+</div>`;
+}
+});
 }
 
-function filter(cat){
-  renderProducts(cat);
-}
+function filter(c){renderProducts(c)}
 
-function addToCart(name, price){
-  cart.push({name, price});
-  updateCart();
+function addToCart(name,price){
+cart.push({name,price});
+updateCart();
 }
 
 function updateCart(){
-  let cartDiv = document.getElementById("cartItems");
-  let total = 0;
+let items=document.getElementById("cartItems");
+let total=0;
+items.innerHTML="";
 
-  cartDiv.innerHTML = "";
+cart.forEach((i,index)=>{
+items.innerHTML+=`
+<div class="flex justify-between">
+<span>${i.name} - $${i.price}</span>
+<button onclick="removeItem(${index})">❌</button>
+</div>`;
+total+=i.price;
+});
 
-  cart.forEach((item, index) => {
-    cartDiv.innerHTML += `
-    <div class="flex justify-between">
-      <span>${item.name} - $${item.price}</span>
-      <button onclick="removeItem(${index})">❌</button>
-    </div>`;
-    total += item.price;
-  });
-
-  document.getElementById("total").innerText = "$" + total;
-  document.getElementById("count").innerText = cart.length;
+document.getElementById("total").innerText="$"+total;
+document.getElementById("count").innerText=cart.length;
 }
 
-function removeItem(index){
-  cart.splice(index, 1);
-  updateCart();
+function removeItem(i){
+cart.splice(i,1);
+updateCart();
 }
 
 function toggleCart(){
-  let panel = document.getElementById("cartPanel");
-  panel.classList.toggle("hidden");
+document.getElementById("cartPanel").classList.toggle("hidden");
 }
 
 function sendWhatsApp(){
-  let message = "Hola, quiero pedir:%0A";
-  let total = 0;
+let msg="Hola, quiero pedir:%0A";
+let total=0;
 
-  cart.forEach(item => {
-    message += "- " + item.name + " $" + item.price + "%0A";
-    total += item.price;
-  });
+cart.forEach(i=>{
+msg+=`- ${i.name} $${i.price}%0A`;
+total+=i.price;
+});
 
-  message += "%0ATotal: $" + total;
+msg+=`%0ATotal: $${total}`;
 
-  let phone = "521XXXXXXXXXX";
+let phone="5215550572742";
 
-  window.open("https://wa.me/" + phone + "?text=" + message);
+window.open("https://wa.me/"+phone+"?text="+msg);
 }
 
 renderProducts();
 
-/* GENERAR QR */
-new QRCode(document.getElementById("qrcode"), {
-  text: window.location.href,
-  width: 150,
-  height: 150
-});
 </script>
 
 </body>
