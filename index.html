@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Smash House</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<style>
+body { background: #0f0f0f; }
+</style>
+</head>
+
+<body class="text-white font-sans">
+
+<!-- HEADER -->
+<div class="p-4 text-center text-2xl font-bold bg-black shadow">
+🍔 Smash House
+<p class="text-sm text-gray-400">Ordena fácil y rápido 🔥</p>
+</div>
+
+<!-- CATEGORÍAS -->
+<div class="flex overflow-x-auto gap-3 p-3">
+  <button onclick="filter('all')" class="bg-yellow-500 px-4 py-2 rounded-full">Todo</button>
+  <button onclick="filter('burger')" class="bg-gray-800 px-4 py-2 rounded-full">🍔 Burgers</button>
+  <button onclick="filter('papas')" class="bg-gray-800 px-4 py-2 rounded-full">🍟 Papas</button>
+  <button onclick="filter('bebidas')" class="bg-gray-800 px-4 py-2 rounded-full">🥤 Bebidas</button>
+</div>
+
+<!-- PRODUCTOS -->
+<div id="products" class="p-4 grid gap-4"></div>
+
+<!-- BOTÓN FLOTANTE -->
+<div class="fixed bottom-20 right-5">
+  <button onclick="toggleCart()" class="bg-green-500 p-4 rounded-full shadow-lg">
+    🛒 <span id="count">0</span>
+  </button>
+</div>
+
+<!-- CARRITO -->
+<div id="cartPanel" class="fixed bottom-0 left-0 right-0 bg-black p-4 hidden">
+  <h2 class="text-lg mb-2">Tu pedido</h2>
+  <div id="cartItems" class="text-sm mb-2"></div>
+  <div class="flex justify-between mb-2">
+    <span>Total:</span>
+    <span id="total">$0</span>
+  </div>
+  <button onclick="sendWhatsApp()" class="bg-green-500 w-full py-2 rounded-lg mb-2">
+    Enviar pedido 📲
+  </button>
+</div>
+
+<!-- QR -->
+<div class="p-4 text-center">
+  <p class="text-gray-400 mb-2">Escanea para ver el menú</p>
+  <div id="qrcode" class="mx-auto"></div>
+</div>
+
+<script>
+let products = [
+  {name: "Smash Clásica", price: 85, category: "burger"},
+  {name: "Doble Smash", price: 120, category: "burger"},
+  {name: "Papas con queso", price: 65, category: "papas"},
+  {name: "Refresco", price: 25, category: "bebidas"},
+];
+
+let cart = [];
+
+function renderProducts(filterCategory = "all") {
+  let container = document.getElementById("products");
+  container.innerHTML = "";
+
+  products.forEach(p => {
+    if (filterCategory === "all" || p.category === filterCategory) {
+      container.innerHTML += `
+      <div class="bg-gray-900 p-4 rounded-xl transform hover:scale-105 transition duration-300">
+        <h3 class="text-lg font-bold">${p.name}</h3>
+        <p class="text-yellow-400">$${p.price}</p>
+        <button onclick="addToCart('${p.name}', ${p.price})"
+        class="mt-2 bg-green-500 px-3 py-1 rounded">
+        Agregar +
+        </button>
+      </div>`;
+    }
+  });
+}
+
+function filter(cat){
+  renderProducts(cat);
+}
+
+function addToCart(name, price){
+  cart.push({name, price});
+  updateCart();
+}
+
+function updateCart(){
+  let cartDiv = document.getElementById("cartItems");
+  let total = 0;
+
+  cartDiv.innerHTML = "";
+
+  cart.forEach((item, index) => {
+    cartDiv.innerHTML += `
+    <div class="flex justify-between">
+      <span>${item.name} - $${item.price}</span>
+      <button onclick="removeItem(${index})">❌</button>
+    </div>`;
+    total += item.price;
+  });
+
+  document.getElementById("total").innerText = "$" + total;
+  document.getElementById("count").innerText = cart.length;
+}
+
+function removeItem(index){
+  cart.splice(index, 1);
+  updateCart();
+}
+
+function toggleCart(){
+  let panel = document.getElementById("cartPanel");
+  panel.classList.toggle("hidden");
+}
+
+function sendWhatsApp(){
+  let message = "Hola, quiero pedir:%0A";
+  let total = 0;
+
+  cart.forEach(item => {
+    message += "- " + item.name + " $" + item.price + "%0A";
+    total += item.price;
+  });
+
+  message += "%0ATotal: $" + total;
+
+  let phone = "521XXXXXXXXXX";
+
+  window.open("https://wa.me/" + phone + "?text=" + message);
+}
+
+renderProducts();
+
+/* GENERAR QR */
+new QRCode(document.getElementById("qrcode"), {
+  text: window.location.href,
+  width: 150,
+  height: 150
+});
+</script>
+
+</body>
+</html>
