@@ -19,11 +19,9 @@ body {
 <!-- HEADER -->
 <div class="p-4 text-center bg-black">
 <h1 class="text-2xl font-bold">🔥 Smash House</h1>
-<p class="text-gray-400 text-sm">Sabor que prende 🔥</p>
-<p id="estado" class="text-green-400 text-sm mt-1"></p>
+<p id="estado" class="text-green-400 text-sm"></p>
 </div>
 
-<!-- PRODUCTOS -->
 <div id="products" class="p-4 grid gap-4"></div>
 
 <!-- BOTÓN -->
@@ -85,36 +83,51 @@ Enviar pedido
 <script>
 
 // CONFIG
-const negocioLat = 19.6018;
-const negocioLon = -99.0506;
-const maxDistancia = 10; // km
+const negocioLat = 19.60;
+const negocioLon = -99.05;
+const maxDistancia = 10;
 const pedidoMin = 100;
 
 // HORARIO
 function checkHorario(){
-let h = new Date().getHours();
-let abierto = (h>=14 && h<=23);
-
-document.getElementById("estado").innerText =
-abierto ? "🟢 Abierto" : "🔴 Cerrado";
-
+let h=new Date().getHours();
+let abierto=(h>=14 && h<=23);
+document.getElementById("estado").innerText=abierto?"🟢 Abierto":"🔴 Cerrado";
 return abierto;
 }
 
-// PRODUCTOS
-let products=[];
-for(let i=1;i<=25;i++){
-products.push({
-name:"Hamburguesa "+i,
-price:80+i,
+// PRODUCTOS VARIADOS
+let products = [
+
+{ name:"Smash Burger",price:95,desc:"Carne, queso, pan brioche",
 img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd",
-desc:"Hamburguesa deliciosa 🔥",
-extras:[
-{name:"Queso extra",price:15},
-{name:"Tocino",price:20},
-{name:"Carne extra",price:30}
-]
-});
+extras:[{name:"Queso extra",price:15},{name:"Tocino",price:20}]},
+
+{ name:"Tacos al pastor",price:70,desc:"Tortilla con carne al pastor",
+img:"https://images.unsplash.com/photo-1600891964599-f61ba0e24092",
+extras:[{name:"Piña extra",price:10},{name:"Queso",price:15}]},
+
+{ name:"Papas con queso",price:65,desc:"Papas crujientes",
+img:"https://images.unsplash.com/photo-1585238342028-4c4bdfd0c4d3",
+extras:[{name:"Tocino",price:20},{name:"Extra queso",price:15}]},
+
+{ name:"Malteada",price:60,desc:"Chocolate o fresa",
+img:"https://images.unsplash.com/photo-1572490122747-3968b75cc699",
+extras:[{name:"Chantilly",price:10},{name:"Galleta",price:10}]},
+
+{ name:"Cheesecake",price:55,desc:"Postre cremoso",
+img:"https://images.unsplash.com/photo-1578985545062-69928b1d9587",
+extras:[{name:"Fresa",price:10},{name:"Chocolate",price:10}]},
+
+{ name:"Combo burger",price:150,desc:"Burger + papas + bebida",
+img:"https://images.unsplash.com/photo-1600891964599-f61ba0e24092",
+extras:[{name:"Agrandar papas",price:20},{name:"Refresco grande",price:15}]}
+
+];
+
+// DUPLICAR HASTA 25
+while(products.length<25){
+products.push({...products[products.length%6]});
 }
 
 let cart=JSON.parse(localStorage.getItem("cart"))||[];
@@ -122,9 +135,7 @@ let selectedProduct=null;
 let ubicacionLink="";
 let distancia=0;
 
-function saveCart(){
-localStorage.setItem("cart",JSON.stringify(cart));
-}
+function saveCart(){localStorage.setItem("cart",JSON.stringify(cart));}
 
 function renderProducts(){
 let html="";
@@ -144,25 +155,17 @@ document.getElementById("products").innerHTML=html;
 function openModal(i){
 selectedProduct=products[i];
 document.getElementById("modal").classList.remove("hidden");
-
 document.getElementById("modalName").innerText=selectedProduct.name;
 document.getElementById("modalDesc").innerText=selectedProduct.desc;
 
 let extrasHTML="";
 selectedProduct.extras.forEach((e,index)=>{
-extrasHTML+=`
-<label>
-<input type="checkbox" value="${index}">
-${e.name} +$${e.price}
-</label><br>`;
+extrasHTML+=`<label><input type="checkbox" value="${index}"> ${e.name} +$${e.price}</label><br>`;
 });
-
 document.getElementById("extras").innerHTML=extrasHTML;
 }
 
-function closeModal(){
-document.getElementById("modal").classList.add("hidden");
-}
+function closeModal(){document.getElementById("modal").classList.add("hidden");}
 
 function addToCartWithExtras(){
 let checks=document.querySelectorAll("#extras input");
@@ -209,25 +212,20 @@ let lat=pos.coords.latitude;
 let lon=pos.coords.longitude;
 
 ubicacionLink=`https://maps.google.com?q=${lat},${lon}`;
-
 document.getElementById("mapa").classList.remove("hidden");
-document.getElementById("mapFrame").src=
-`https://maps.google.com/maps?q=${lat},${lon}&output=embed`;
+document.getElementById("mapFrame").src=`https://maps.google.com/maps?q=${lat},${lon}&output=embed`;
 
 distancia=calcularDistancia(lat,lon,negocioLat,negocioLon);
 
-// ZONA
 if(distancia>maxDistancia){
 alert("Fuera de zona 😬");
 return;
 }
 
-// ENVÍO
 let envio=Math.round(distancia*5);
 document.getElementById("envio").value=envio;
 
 updateCart();
-
 });
 }
 
@@ -237,8 +235,7 @@ let dLat=(lat2-lat1)*Math.PI/180;
 let dLon=(lon2-lon1)*Math.PI/180;
 
 let a=Math.sin(dLat/2)**2+
-Math.cos(lat1*Math.PI/180)*
-Math.cos(lat2*Math.PI/180)*
+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*
 Math.sin(dLon/2)**2;
 
 return 2*R*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
@@ -247,7 +244,7 @@ return 2*R*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 function sendWhatsApp(){
 
 if(!checkHorario()){
-alert("Negocio cerrado 😬");
+alert("Cerrado 😬");
 return;
 }
 
