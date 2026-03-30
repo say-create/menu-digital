@@ -316,47 +316,45 @@ function sendWhatsApp(){
 let msg="Pedido:%0A";
 let total=0;
 
+// productos
 cart.forEach(p=>{
 msg+=`${p.name} $${p.price}%0A`;
 total+=p.price;
 });
 
-// 👇 FORZAMOS lectura correcta
-let pago = Number(document.getElementById("cambio").value);
-if(isNaN(pago)) pago = 0;
+// 🔥 LEER BIEN EL INPUT
+let inputCambio = document.getElementById("cambio").value.trim();
 
-// 👇 cálculo correcto
-let cambioFinal = pago - total;
-if(cambioFinal < 0) cambioFinal = 0;
+// quitar símbolos por si escriben "$200"
+inputCambio = inputCambio.replace("$","");
 
-// 👇 mensaje bien armado
-msg+=`Total: $${total}%0A`;
-msg+=`Pagará con: $${pago}%0A`;
-msg+=`Cambio: $${cambioFinal}%0A`;
-msg+=`Método: ${metodoPago.value}%0A`;
-msg+=`Ubicación: ${ubicacion}%0A`;
-msg+=`Dirección: ${direccion.value}`;
+// convertir a número
+let pago = parseFloat(inputCambio);
 
-window.open("https://wa.me/5215550572742?text="+msg);
-
+// validar
+if(isNaN(pago)){
+alert("Ingresa correctamente con cuánto pagarás");
+return;
 }
 
-cart.forEach(p=>{
-msg+=`${p.name} $${p.price}%0A`;
-total+=p.price;
-});
+// 🔥 CALCULAR CAMBIO
+let cambioFinal = pago - total;
 
-let pago=parseInt(cambio.value)||0;
-let cambioFinal=pago-total;
+if(cambioFinal < 0){
+alert("El monto es menor al total");
+return;
+}
 
+// 🔥 MENSAJE CORRECTO
 msg+=`Total: $${total}%0A`;
 msg+=`Pagará con: $${pago}%0A`;
 msg+=`Cambio: $${cambioFinal}%0A`;
-msg+=`Método: ${metodoPago.value}%0A`;
+msg+=`Método: ${document.getElementById("metodoPago").value}%0A`;
 msg+=`Ubicación: ${ubicacion}%0A`;
-msg+=`Dirección: ${direccion.value}`;
+msg+=`Dirección: ${document.getElementById("direccion").value}`;
 
 window.open("https://wa.me/5215550572742?text="+msg);
+
 }
 
 // INSTALL
