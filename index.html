@@ -113,7 +113,14 @@ body{margin:0;font-family:sans-serif}
 <input id="nombre" placeholder="Nombre" class="text-black">
 <input id="precio" placeholder="Precio" class="text-black">
 <input id="desc" placeholder="Descripción" class="text-black">
-
+<select id="categoria" class="text-black mt-2">
+<option value="burger">🍔 Burgers</option>
+<option value="tacos">🌮 Tacos</option>
+<option value="papas">🍟 Papas</option>
+<option value="bebidas">🥤 Bebidas</option>
+<option value="postres">🍰 Postres</option>
+</select>
+  
 <!-- EXTRAS -->
 <input id="extraNombre" placeholder="Extra (ej: queso)" class="text-black mt-2">
 <input id="extraPrecio" placeholder="Precio extra" class="text-black mt-2">
@@ -157,12 +164,25 @@ let extrasTemp=[];
 
 // EXTRAS PANEL
 function addExtra(){
-if(!extraNombre.value || !extraPrecio.value) return;
+
+let nombre = document.getElementById("extraNombre").value.trim();
+let precio = parseFloat(document.getElementById("extraPrecio").value);
+
+if(!nombre || isNaN(precio)){
+alert("Completa bien el extra");
+return;
+}
 
 extrasTemp.push({
-name:extraNombre.value,
-price:parseInt(extraPrecio.value)
+name:nombre,
+price:precio
 });
+
+document.getElementById("extraNombre").value="";
+document.getElementById("extraPrecio").value="";
+
+renderExtras();
+}
 
 extraNombre.value="";
 extraPrecio.value="";
@@ -171,12 +191,22 @@ renderExtras();
 
 function renderExtras(){
 let html="";
-extrasTemp.forEach(e=>{
-html+=`${e.name} +$${e.price}<br>`;
+
+extrasTemp.forEach((e,i)=>{
+html+=`
+<div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+<span>${e.name} +$${e.price}</span>
+<button onclick="deleteExtra(${i})">❌</button>
+</div>
+`;
 });
+
 listaExtras.innerHTML=html;
 }
-
+function deleteExtra(i){
+extrasTemp.splice(i,1);
+renderExtras();
+}
 // MENU
 function enterMenu(){home.style.display="none";menu.classList.remove("hidden");renderProducts();}
 
@@ -288,7 +318,7 @@ renderExtras();
 
 function addProduct(){
 products.push({
-cat:"burger",
+cat:document.getElementById("categoria").value,
 name:nombre.value,
 price:parseInt(precio.value),
 desc:desc.value,
