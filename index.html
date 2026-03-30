@@ -113,6 +113,7 @@ body{margin:0;font-family:sans-serif}
 <input id="nombre" placeholder="Nombre" class="text-black">
 <input id="precio" placeholder="Precio" class="text-black">
 <input id="desc" placeholder="Descripción" class="text-black">
+<input id="imagen" placeholder="URL de imagen" class="border p-2 w-full mt-2">
 <select id="categoria" class="text-black mt-2">
 <option value="burger">🍔 Burgers</option>
 <option value="tacos">🌮 Tacos</option>
@@ -307,6 +308,7 @@ function editP(i){
 nombre.value=products[i].name;
 precio.value=products[i].price;
 desc.value=products[i].desc;
+imagen.value = products[i].img;
 extrasTemp=products[i].extras||[];
 renderExtras();
 }
@@ -317,7 +319,7 @@ cat:document.getElementById("categoria").value,
 name:nombre.value,
 price:parseInt(precio.value),
 desc:desc.value,
-img:"https://images.unsplash.com/photo-1550547660-d9450f859349",
+img: document.getElementById("imagen").value || "https://images.unsplash.com/photo-1504754524776-8f4f37790ca0",
 extras:extrasTemp,
 active:true
 });
