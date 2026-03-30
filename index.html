@@ -8,7 +8,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
-body{margin:0;font-family:sans-serif;overflow-x:hidden}
+body{margin:0;font-family:sans-serif}
 
 /* VIDEO */
 .video-bg{
@@ -34,7 +34,7 @@ background:rgba(0,0,0,0.6);
 backdrop-filter:blur(10px);
 }
 
-/* animaciones */
+/* cards */
 .card{transition:.3s}
 .card:hover{transform:scale(1.05)}
 
@@ -61,7 +61,6 @@ z-index:40;
 <!-- HOME -->
 <div id="home" class="h-screen flex flex-col justify-center items-center glass">
 <h1 class="text-5xl font-bold mb-4">🔥 Smash House</h1>
-<p class="mb-6">Las mejores burgers 🔥</p>
 <button onclick="enterMenu()" class="bg-yellow-500 px-6 py-3 rounded text-black">Ver menú</button>
 </div>
 
@@ -70,23 +69,14 @@ z-index:40;
 
 <div class="glass p-4 text-center">
 <h1 class="text-2xl">🍔 Menú</h1>
-<p>⭐ 4.9 (520 reseñas) • Ecatepec</p>
-</div>
-
-<!-- CATEGORÍAS -->
-<div class="flex gap-2 p-3 overflow-x-auto glass">
-<button onclick="renderProducts('all')" class="bg-yellow-500 px-3 py-1 rounded-full">Todo</button>
-<button onclick="renderProducts('burger')" class="bg-gray-800 px-3 py-1 rounded-full">🍔</button>
-<button onclick="renderProducts('tacos')" class="bg-gray-800 px-3 py-1 rounded-full">🌮</button>
-<button onclick="renderProducts('bebidas')" class="bg-gray-800 px-3 py-1 rounded-full">🥤</button>
-<button onclick="renderProducts('postres')" class="bg-gray-800 px-3 py-1 rounded-full">🍰</button>
+<p>⭐ 4.9 • Ecatepec</p>
 </div>
 
 <div id="products" class="p-4 grid gap-4"></div>
 
-<!-- BOTÓN CARRITO -->
+<!-- BOTÓN -->
 <div class="fixed bottom-5 right-5 z-50">
-<button onclick="openCart()" class="bg-green-500 p-4 rounded-full shadow-lg">
+<button onclick="openCart()" class="bg-green-500 p-4 rounded-full">
 🛒 <span id="count">0</span>
 </button>
 </div>
@@ -94,9 +84,9 @@ z-index:40;
 <div id="overlay" class="overlay" onclick="closeCart()"></div>
 
 <!-- CARRITO -->
-<div id="cartPanel" class="fixed bottom-0 left-0 right-0 bg-black p-4 hidden z-50 rounded-t-xl max-h-[70vh] overflow-y-auto">
+<div id="cartPanel" class="fixed bottom-0 left-0 right-0 bg-black p-4 hidden z-50 max-h-[70vh] overflow-y-auto">
 
-<div class="flex justify-between mb-2">
+<div class="flex justify-between">
 <h2>Tu pedido</h2>
 <button onclick="closeCart()">✖</button>
 </div>
@@ -118,28 +108,61 @@ z-index:40;
 
 </div>
 
+<!-- MODAL -->
+<div id="modal" class="fixed inset-0 bg-black bg-opacity-90 hidden flex items-center justify-center">
+<div class="bg-gray-900 p-4 rounded w-11/12">
+<h2 id="modalName"></h2>
+<p id="modalDesc"></p>
+<div id="extras"></div>
+
+<button onclick="confirmAdd()" class="bg-green-500 w-full mt-2">Agregar</button>
+<button onclick="closeModal()" class="text-red-400 mt-2">Cerrar</button>
+</div>
+</div>
+
+<!-- ADMIN -->
+<button onclick="showAdmin()" class="fixed top-5 right-5 bg-yellow-500 px-3 py-1 rounded">⚙️</button>
+
+<div id="admin" class="hidden fixed inset-0 bg-black p-4 overflow-y-auto">
+<input id="pass" type="password" placeholder="Contraseña" class="text-black">
+<button onclick="login()">Entrar</button>
+
+<div id="panel" class="hidden">
+<h2>Admin</h2>
+
+<input id="nombre" placeholder="Nombre" class="text-black">
+<input id="precio" placeholder="Precio" class="text-black">
+
+<button onclick="addProduct()">Agregar</button>
+
+<div id="adminList"></div>
+</div>
+</div>
+
 </div>
 
 <script>
 
-// PRODUCTOS VARIADOS
-let baseProducts=[
-{cat:"burger",name:"Clásica",price:90,img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd"},
-{cat:"burger",name:"BBQ",price:130,img:"https://images.unsplash.com/photo-1606755962773-d324e0a13086"},
-{cat:"tacos",name:"Pastor",price:70,img:"https://images.unsplash.com/photo-1600891964599-f61ba0e24092"},
-{cat:"bebidas",name:"Refresco",price:25,img:"https://images.unsplash.com/photo-1581006852262-e4307cf6283a"},
-{cat:"postres",name:"Brownie",price:45,img:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c"}
+// PRODUCTOS CON EXTRAS
+let products=[
+{
+name:"Clásica",price:90,cat:"burger",
+extras:[
+{name:"Queso",price:15},
+{name:"Tocino",price:20}
+]
+}
 ];
 
-let products=[];
+// GENERAR 25
 while(products.length<25){
-products.push({...baseProducts[products.length%5],name:baseProducts[products.length%5].name+" "+products.length});
+products.push({...products[0],name:"Burger "+products.length});
 }
 
 let cart=[];
-let ubicacion="";
+let selectedProduct=null;
 
-// ENTRAR
+// MENU
 function enterMenu(){
 home.style.display="none";
 menu.classList.remove("hidden");
@@ -147,37 +170,65 @@ renderProducts();
 }
 
 // RENDER
-function renderProducts(cat="all"){
+function renderProducts(){
 let html="";
 products.forEach((p,i)=>{
-if(cat==="all"||p.cat===cat){
 html+=`
 <div class="card glass p-3 rounded">
-<img src="${p.img}" class="w-full h-32 object-cover rounded">
 <h3>${p.name}</h3>
 <p>$${p.price}</p>
-<button onclick="addToCart(${i})" class="bg-green-500 w-full mt-2">Agregar</button>
+<button onclick="openModal(${i})">Agregar</button>
 </div>`;
+});
+productsDiv=document.getElementById("products");
+productsDiv.innerHTML=html;
+}
+
+// MODAL
+function openModal(i){
+selectedProduct=products[i];
+modal.classList.remove("hidden");
+
+modalName.innerText=selectedProduct.name;
+
+let html="";
+selectedProduct.extras.forEach(e=>{
+html+=`
+<label>
+<input type="checkbox" data-price="${e.price}">
+${e.name} +$${e.price}
+</label><br>`;
+});
+extras.innerHTML=html;
+}
+
+function closeModal(){
+modal.classList.add("hidden");
+}
+
+function confirmAdd(){
+let total=selectedProduct.price;
+
+document.querySelectorAll("#extras input").forEach(e=>{
+if(e.checked){
+total+=parseInt(e.dataset.price);
 }
 });
-products.innerHTML=html;
-document.getElementById("products").innerHTML=html;
+
+cart.push({name:selectedProduct.name,price:total});
+updateCart();
+closeModal();
 }
 
 // CARRITO
-function addToCart(i){
-cart.push(products[i]);
-updateCart();
-}
-
 function updateCart(){
 let html="";
 let total=0;
 
 cart.forEach((p,i)=>{
 html+=`
-<div class="flex justify-between">
-<span>${p.name} $${p.price}</span>
+<div>
+${p.name} $${p.price}
 <button onclick="removeItem(${i})">❌</button>
 </div>`;
 total+=p.price;
@@ -193,45 +244,84 @@ cart.splice(i,1);
 updateCart();
 }
 
-// UI carrito
+// UI
 function openCart(){
 cartPanel.classList.remove("hidden");
 overlay.style.display="block";
 }
-
 function closeCart(){
 cartPanel.classList.add("hidden");
 overlay.style.display="none";
 }
 
-// ubicación
+// ADMIN
+function showAdmin(){admin.classList.remove("hidden");}
+
+function login(){
+if(pass.value==="1234"){
+panel.classList.remove("hidden");
+renderAdmin();
+}
+}
+
+function renderAdmin(){
+let html="";
+products.forEach((p,i)=>{
+html+=`${p.name} <button onclick="deleteP(${i})">❌</button><br>`;
+});
+adminList.innerHTML=html;
+}
+
+function deleteP(i){
+products.splice(i,1);
+renderProducts();
+renderAdmin();
+}
+
+function addProduct(){
+products.push({name:nombre.value,price:parseInt(precio.value),extras:[]});
+renderProducts();
+renderAdmin();
+}
+
+// UBICACIÓN
 function getLocation(){
 navigator.geolocation.getCurrentPosition(pos=>{
 ubicacion=`https://maps.google.com?q=${pos.coords.latitude},${pos.coords.longitude}`;
-alert("Ubicación lista 📍");
 });
 }
 
-// whatsapp
+// WHATS
 function sendWhatsApp(){
-let msg="🔥 Pedido:%0A";
-let total=0;
-
-cart.forEach(p=>{
-msg+=`${p.name} $${p.price}%0A`;
-total+=p.price;
-});
-
-msg+=`%0ATotal: $${total}`;
-msg+=`%0ADirección: ${direccion.value}`;
-msg+=`%0AUbicación: ${ubicacion}`;
-msg+=`%0AMétodo: ${metodoPago.value}`;
-msg+=`%0APagaré con: $${cambio.value}`;
-
+let msg="Pedido:%0A";
+cart.forEach(p=>msg+=`${p.name} $${p.price}%0A`);
 window.open("https://wa.me/5215550572742?text="+msg);
 }
+let deferredPrompt;
 
+window.addEventListener("beforeinstallprompt", (e) => {
+e.preventDefault();
+deferredPrompt = e;
+document.getElementById("installBtn").style.display = "block";
+});
+
+document.getElementById("installBtn").addEventListener("click", async () => {
+
+if(deferredPrompt){
+deferredPrompt.prompt();
+const choice = await deferredPrompt.userChoice;
+
+deferredPrompt = null;
+
+}else{
+alert("Para instalar:\n\nEn iPhone:\nCompartir → Agregar a inicio\n\nEn Android: aparece automático");
+}
+
+});
 </script>
 
 </body>
+<button id="installBtn" class="fixed top-5 left-5 bg-green-500 px-3 py-1 rounded z-50">
+📲 Instalar App
+</button>
 </html>
