@@ -20,8 +20,9 @@ body{margin:0;font-family:sans-serif}
 
 <body class="text-white">
 <button id="installBtn"
-class="fixed bottom-20 left-4 bg-green-500 text-white px-3 py-2 rounded-full shadow-lg z-40 text-sm">
-📲 Agrégame
+class="fixed bottom-20 left-4 bg-green-500 text-white px-3 py-2 rounded-full shadow-lg z-40 text-sm"
+style="pointer-events:auto;">
+📲
 </button>
 
 <div class="fallback"></div>
@@ -153,8 +154,8 @@ let ubicacion="";
 
 // MENU
 function enterMenu(){
-home.style.display="none";
-menu.classList.remove("hidden");
+document.getElementById("home").style.display="none";
+document.getElementById("menu").classList.remove("hidden");
 renderProducts();
 }
 
@@ -335,7 +336,30 @@ e.preventDefault();
 deferredPrompt=e;
 });
 
-installBtn.addEventListener("click", async ()=>{
+document.addEventListener("DOMContentLoaded",()=>{
+
+let btn = document.getElementById("installBtn");
+
+let deferredPrompt;
+
+window.addEventListener("beforeinstallprompt",(e)=>{
+e.preventDefault();
+deferredPrompt=e;
+});
+
+btn.addEventListener("click", async ()=>{
+
+if(deferredPrompt){
+deferredPrompt.prompt();
+deferredPrompt=null;
+
+}else{
+alert("📲 Agrégame a tu pantalla de inicio\n\nEn iPhone:\n1. Compartir 📤\n2. Agregar a inicio\n\nEn Android aparecerá automático");
+}
+
+});
+
+});
 
 if(deferredPrompt){
 deferredPrompt.prompt();
