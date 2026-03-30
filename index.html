@@ -19,11 +19,13 @@ body{margin:0;font-family:sans-serif}
 </head>
 
 <body class="text-white">
+
 <button id="installBtn"
 class="fixed bottom-20 left-4 bg-green-500 text-white px-3 py-2 rounded-full shadow-lg z-40 text-sm"
 style="pointer-events:auto;">
 📲
 </button>
+
 <div class="fallback"></div>
 
 <video autoplay muted loop playsinline class="video-bg">
@@ -34,7 +36,7 @@ style="pointer-events:auto;">
 <div id="home" class="h-screen flex flex-col justify-center items-center glass">
 <h1 class="text-5xl font-bold mb-4">🔥 Smash House</h1>
 <p class="mb-4">Las burgers más brutales de tu zona 🍔</p>
-<button onclick="document.getElementById('home').style.display='none';document.getElementById('menu').classList.remove('hidden');"
+<button onclick="enterMenu()"
 class="bg-yellow-500 px-6 py-3 rounded text-black">
 Ver menú
 </button>
@@ -48,7 +50,6 @@ Ver menú
 <p>⭐ 4.9 • Ecatepec • +500 reseñas</p>
 </div>
 
-<!-- CATEGORÍAS -->
 <div class="flex gap-2 p-3 overflow-x-auto glass">
 <button onclick="renderProducts('all')" class="bg-yellow-500 px-3 py-1 rounded-full">Todo</button>
 <button onclick="renderProducts('burger')" class="bg-gray-800 px-3 py-1 rounded-full">🍔</button>
@@ -60,7 +61,7 @@ Ver menú
 
 <div id="products" class="p-4 grid gap-4"></div>
 
-<!-- BOTÓN CARRITO -->
+<!-- CARRITO -->
 <div class="fixed bottom-5 right-5 z-50">
 <button onclick="openCart()" class="bg-green-500 p-4 rounded-full shadow-lg">
 🛒 <span id="count">0</span>
@@ -69,7 +70,6 @@ Ver menú
 
 <div id="overlay" class="overlay" onclick="closeCart()"></div>
 
-<!-- CARRITO -->
 <div id="cartPanel" class="fixed bottom-0 left-0 right-0 bg-black p-4 hidden z-50 max-h-[70vh] overflow-y-auto">
 <div class="flex justify-between">
 <h2>Tu pedido</h2>
@@ -130,38 +130,25 @@ Ver menú
 
 <script>
 
-// PRODUCTOS COMPLETOS (25+ reales)
+// PRODUCTOS
 let products = [
 {cat:"burger",name:"🔥 Smash Clásica",price:90,desc:"Carne jugosa con queso derretido brutal.",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80",extras:[{name:"Queso",price:15},{name:"Tocino",price:20}]},
-{cat:"burger",name:"💣 Doble Explosiva",price:120,desc:"Doble carne, doble placer.",img:"https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=80",extras:[{name:"Extra carne",price:30}]},
-{cat:"tacos",name:"🌮 Pastor Supremo",price:70,desc:"Con piña caramelizada irresistible.",img:"https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=800&q=80",extras:[{name:"Queso",price:10}]},
-{cat:"papas",name:"🍟 Papas Supreme",price:80,desc:"Crujientes con queso y tocino.",img:"https://images.unsplash.com/photo-1576107232684-1279f390859f?auto=format&fit=crop&w=800&q=80",extras:[{name:"Queso extra",price:15}]},
-{cat:"bebidas",name:"🥤 Refresco Helado",price:25,desc:"Perfecto para acompañar.",img:"https://images.unsplash.com/photo-1581006852262-e4307cf6283a?auto=format&fit=crop&w=800&q=80",extras:[]},
-{cat:"postres",name:"🍰 Cheesecake",price:55,desc:"Suave, cremoso y delicioso.",img:"https://images.unsplash.com/photo-1578985545062-69928b1d9587?auto=format&fit=crop&w=800&q=80",extras:[]}
+{cat:"tacos",name:"🌮 Pastor Supremo",price:70,desc:"Con piña caramelizada irresistible.",img:"https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=800&q=80",extras:[]}
 ];
 
-// completar a 25 sin repetir exactamente
 while(products.length < 25){
-let base = products[products.length % 6];
-products.push({
-...base,
-name: base.name + " " + products.length,
-price: base.price + Math.floor(Math.random()*20)
-});
+let base = products[products.length % 2];
+products.push({...base,name:base.name+" "+products.length,price:base.price+10});
 }
 
-let cart=[];
-let selectedProduct=null;
-let ubicacion="";
+let cart=[],selectedProduct=null,ubicacion="";
 
-// MENU
 function enterMenu(){
-document.getElementById("home").style.display="none";
-document.getElementById("menu").classList.remove("hidden");
+home.style.display="none";
+menu.classList.remove("hidden");
 renderProducts();
 }
 
-// RENDER
 function renderProducts(cat="all"){
 let html="";
 products.forEach((p,i)=>{
@@ -172,28 +159,22 @@ html+=`
 <h3>${p.name}</h3>
 <p>${p.desc}</p>
 <p class="text-green-400 font-bold">$${p.price}</p>
-
-<button onclick="openModal(${i})"
-class="bg-orange-500 w-10 h-10 flex items-center justify-center rounded text-white text-xl mt-2">+</button>
-
+<button onclick="openModal(${i})" class="bg-orange-500 w-10 h-10 rounded text-white text-xl mt-2">+</button>
 </div>`;
-}
-});
+}});
+products.innerHTML=html;
 document.getElementById("products").innerHTML=html;
 }
 
-// MODAL
 function openModal(i){
 selectedProduct=products[i];
 modal.classList.remove("hidden");
 modalName.innerText=selectedProduct.name;
 modalDesc.innerText=selectedProduct.desc;
-
-let html="";
+extras.innerHTML="";
 selectedProduct.extras.forEach(e=>{
-html+=`<label><input type="checkbox" data-price="${e.price}"> ${e.name} +$${e.price}</label><br>`;
+extras.innerHTML+=`<label><input type="checkbox" data-price="${e.price}"> ${e.name}</label><br>`;
 });
-extras.innerHTML=html;
 }
 
 function closeModal(){modal.classList.add("hidden");}
@@ -208,100 +189,40 @@ updateCart();
 closeModal();
 }
 
-// CARRITO
 function updateCart(){
 let html="",total=0;
 cart.forEach((p,i)=>{
 html+=`${p.name} $${p.price} <button onclick="removeItem(${i})">❌</button><br>`;
 total+=p.price;
 });
-document.getElementById("cartItems").innerHTML=html;
+cartItems.innerHTML=html;
 document.getElementById("total").innerText="Total: $"+total;
 document.getElementById("count").innerText=cart.length;
 }
 
-function removeItem(i){
-cart.splice(i,1);
-updateCart();
-}
+function removeItem(i){cart.splice(i,1);updateCart();}
 
-// UI
-function openCart(){
-cartPanel.classList.remove("hidden");
-overlay.style.display="block";
-}
-function closeCart(){
-cartPanel.classList.add("hidden");
-overlay.style.display="none";
-}
+function openCart(){cartPanel.classList.remove("hidden");overlay.style.display="block";}
+function closeCart(){cartPanel.classList.add("hidden");overlay.style.display="none";}
 
-// ADMIN
 function showAdmin(){admin.classList.remove("hidden");}
 function closeAdmin(){admin.classList.add("hidden");}
 
-function login(){
-if(pass.value==="1234"){
-panel.classList.remove("hidden");
-renderAdmin();
-}
-}
-
-function renderAdmin(){
-let html="";
-products.forEach((p,i)=>{
-html+=`${p.name} <button onclick="deleteP(${i})">❌</button><br>`;
-});
-adminList.innerHTML=html;
-}
-
-function deleteP(i){
-products.splice(i,1);
-renderProducts();
-renderAdmin();
-}
+function login(){if(pass.value==="1234"){panel.classList.remove("hidden");}}
 
 function addProduct(){
-
-let file = document.getElementById("imgFile").files[0];
-
+let file=document.getElementById("imgFile").files[0];
 if(file){
-let reader = new FileReader();
-
-reader.onload = function(e){
-
-products.push({
-name:nombre.value,
-price:parseInt(precio.value),
-desc:desc.value,
-cat:"burger",
-img:e.target.result,
-extras:[]
-});
-
+let reader=new FileReader();
+reader.onload=e=>{
+products.push({name:nombre.value,price:+precio.value,desc:desc.value,cat:"burger",img:e.target.result,extras:[]});
 renderProducts();
-renderAdmin();
-
 };
-
 reader.readAsDataURL(file);
-
-}else{
-
-products.push({
-name:nombre.value,
-price:parseInt(precio.value),
-desc:desc.value,
-cat:"burger",
-img:"https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=80",
-extras:[]
-});
-
-renderProducts();
-renderAdmin();
-
+}
 }
 
-// UBICACIÓN
+// GEO
 function getLocation(){
 navigator.geolocation.getCurrentPosition(pos=>{
 ubicacion=`https://maps.google.com?q=${pos.coords.latitude},${pos.coords.longitude}`;
@@ -312,13 +233,11 @@ ubicacion=`https://maps.google.com?q=${pos.coords.latitude},${pos.coords.longitu
 function sendWhatsApp(){
 let msg="Pedido:%0A";
 cart.forEach(p=>msg+=`${p.name} $${p.price}%0A`);
-msg+=`Dirección: ${direccion.value}`;
 msg+=`Ubicación: ${ubicacion}`;
-msg+=`Método: ${metodoPago.value}`;
-msg+=`Pago con: ${cambio.value}`;
 window.open("https://wa.me/5215550572742?text="+msg);
 }
 
+// INSTALAR APP
 let deferredPrompt;
 
 window.addEventListener("beforeinstallprompt",(e)=>{
@@ -326,18 +245,13 @@ e.preventDefault();
 deferredPrompt=e;
 });
 
-document.addEventListener("DOMContentLoaded",()=>{
-
-let btn = document.getElementById("installBtn");
-
-let deferredPrompt;
-
-window.addEventListener("beforeinstallprompt",(e)=>{
-e.preventDefault();
-deferredPrompt=e;
+installBtn.addEventListener("click",()=>{
+if(deferredPrompt){
+deferredPrompt.prompt();
+}else{
+alert("📲 Agrégame a tu pantalla de inicio\n\n1. Compartir 📤\n2. Agregar a inicio");
+}
 });
-
-btn.addEventListener("click", async ()=>{
 
 </script>
 
