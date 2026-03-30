@@ -300,18 +300,6 @@ renderProducts();
 renderAdmin();
 
 }
-}
-products.push({
-name:nombre.value,
-price:parseInt(precio.value),
-desc:desc.value,
-cat:"burger",
-img:"https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=80",
-extras:[]
-});
-renderProducts();
-renderAdmin();
-}
 
 // UBICACIÓN
 function getLocation(){
@@ -351,27 +339,6 @@ deferredPrompt=e;
 
 btn.addEventListener("click", async ()=>{
 
-if(deferredPrompt){
-deferredPrompt.prompt();
-deferredPrompt=null;
-
-}else{
-alert("📲 Agrégame a tu pantalla de inicio\n\nEn iPhone:\n1. Compartir 📤\n2. Agregar a inicio\n\nEn Android aparecerá automático");
-}
-
-});
-
-});
-
-if(deferredPrompt){
-deferredPrompt.prompt();
-deferredPrompt=null;
-
-}else{
-alert("📲 Agrégame a tu pantalla de inicio\n\nEn iPhone:\n1. Presiona compartir 📤\n2. 'Agregar a pantalla de inicio'\n\nEn Android aparecerá automáticamente");
-}
-
-});
 </script>
 
 </body>
