@@ -3,13 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Smash House</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
-body{margin:0}
+body{margin:0; font-family:sans-serif;}
 
+/* VIDEO */
 .video-bg{
 position:fixed;
 top:0;
@@ -17,34 +19,59 @@ left:0;
 width:100%;
 height:100%;
 object-fit:cover;
-z-index:-1;
+z-index:-2;
 }
 
+/* Fallback imagen */
+.fallback{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:url('https://images.unsplash.com/photo-1550547660-d9450f859349') center/cover;
+z-index:-3;
+}
+
+/* glass effect */
+.glass{
+background:rgba(0,0,0,0.6);
+backdrop-filter:blur(10px);
+}
+
+/* cards */
 .card{
-animation:fadeIn 0.5s ease;
-}
-
-.card:hover{
-transform:scale(1.05);
 transition:0.3s;
 }
+.card:hover{
+transform:scale(1.05);
+}
 
-@keyframes fadeIn{
-from{opacity:0; transform:translateY(10px);}
-to{opacity:1; transform:translateY(0);}
+/* carrito overlay */
+.overlay{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.6);
+z-index:40;
+display:none;
 }
 </style>
+
 </head>
 
-<body class="text-white font-sans">
+<body class="text-white">
 
-<!-- VIDEO -->
+<div class="fallback"></div>
+
 <video autoplay muted loop playsinline class="video-bg">
-<source src="https://cdn.coverr.co/videos/coverr-cooking-burger-over-fire-4933/1080p.mp4" type="video/mp4">
+<source src="https://cdn.coverr.co/videos/coverr-burger-on-the-grill-1578/1080p.mp4">
 </video>
 
 <!-- HOME -->
-<div id="home" class="h-screen flex flex-col justify-center items-center bg-black bg-opacity-60">
+<div id="home" class="h-screen flex flex-col justify-center items-center glass">
 <h1 class="text-4xl font-bold mb-4">🔥 Smash House</h1>
 <button onclick="enterMenu()" class="bg-yellow-500 px-6 py-3 rounded text-black">Ver menú</button>
 </div>
@@ -52,339 +79,129 @@ to{opacity:1; transform:translateY(0);}
 <!-- MENU -->
 <div id="menu" class="hidden">
 
-<div class="p-4 text-center bg-black bg-opacity-80">
+<div class="glass p-4 text-center">
 <h1 class="text-2xl">🍔 Menú</h1>
-</div>
-
-<div class="p-3 text-center bg-black bg-opacity-70 text-sm">
-⭐ 4.8 (320 reseñas)<br>
-📍 Ecatepec, México<br>
-💬 “Las mejores burgers 🔥”
-</div>
-
-<button onclick="showLogin()" class="fixed top-5 right-5 bg-yellow-500 px-3 py-1 rounded">⚙️</button>
-
-<!-- CATEGORÍAS -->
-<div class="flex gap-2 p-3 overflow-x-auto bg-black bg-opacity-70">
-<button onclick="renderProducts('all')" class="bg-yellow-500 px-3 py-1 rounded-full">Todo</button>
-<button onclick="renderProducts('burgers')" class="bg-gray-800 px-3 py-1 rounded-full">🍔</button>
-<button onclick="renderProducts('tacos')" class="bg-gray-800 px-3 py-1 rounded-full">🌮</button>
-<button onclick="renderProducts('papas')" class="bg-gray-800 px-3 py-1 rounded-full">🍟</button>
-<button onclick="renderProducts('bebidas')" class="bg-gray-800 px-3 py-1 rounded-full">🥤</button>
-<button onclick="renderProducts('postres')" class="bg-gray-800 px-3 py-1 rounded-full">🍰</button>
+<p>⭐ 4.8 • Ecatepec</p>
 </div>
 
 <div id="products" class="p-4 grid gap-4"></div>
 
-<!-- CARRITO -->
-<div class="fixed bottom-5 right-5">
-<button onclick="toggleCart()" class="bg-green-500 p-4 rounded-full">
+<!-- BOTÓN CARRITO -->
+<div class="fixed bottom-5 right-5 z-50">
+<button onclick="openCart()" class="bg-green-500 p-4 rounded-full shadow-lg">
 🛒 <span id="count">0</span>
 </button>
 </div>
 
-<div id="cartPanel" class="fixed bottom-0 left-0 right-0 bg-black p-4 hidden max-h-[70vh] overflow-y-auto">
+<!-- OVERLAY -->
+<div id="overlay" class="overlay" onclick="closeCart()"></div>
+
+<!-- CARRITO -->
+<div id="cartPanel" class="fixed bottom-0 left-0 right-0 bg-black p-4 hidden z-50 rounded-t-xl max-h-[70vh] overflow-y-auto">
+
+<div class="flex justify-between mb-2">
 <h2>Tu pedido</h2>
+<button onclick="closeCart()">✖</button>
+</div>
+
 <div id="cartItems"></div>
 <p id="total"></p>
 
-<button onclick="getLocation()" class="bg-blue-500 w-full mt-2">Ubicación 📍</button>
 <input id="direccion" placeholder="Dirección" class="w-full text-black mt-2">
 <input id="cambio" placeholder="¿Con cuánto pagarás?" class="w-full text-black mt-2">
 
-<select id="metodoPago" class="w-full text-black mt-2">
-<option value="Efectivo">Efectivo</option>
-<option value="Transferencia">Transferencia</option>
-</select>
-
 <button onclick="sendWhatsApp()" class="bg-green-500 w-full mt-2">Enviar pedido</button>
-</div>
 
 </div>
 
-<!-- MODAL -->
-<div id="modal" class="fixed inset-0 bg-black bg-opacity-90 hidden flex items-center justify-center">
-<div class="bg-gray-900 p-4 rounded w-11/12">
-<h2 id="modalName"></h2>
-<p id="modalDesc"></p>
-
-<div id="extras"></div>
-
-<button onclick="confirmAdd()" class="bg-green-500 w-full mt-2">Agregar</button>
-<button onclick="closeModal()" class="mt-2 text-red-400">Cerrar</button>
-</div>
-</div>
-
-<!-- LOGIN -->
-<div id="loginBox" class="fixed inset-0 bg-black hidden flex items-center justify-center">
-<div class="bg-gray-900 p-6 rounded">
-<input id="passInput" type="password" placeholder="Contraseña" class="p-2 text-black">
-<button onclick="login()" class="bg-green-500 w-full mt-2 p-2">Entrar</button>
-</div>
-</div>
-
-<!-- PANEL -->
-<div id="adminPanel" class="fixed inset-0 bg-black hidden p-4 overflow-y-auto">
-<h2>Panel Admin</h2>
-
-<input id="nombre" placeholder="Nombre" class="w-full text-black mb-2">
-<input id="precio" type="number" placeholder="Precio" class="w-full text-black mb-2">
-<input id="desc" placeholder="Descripción" class="w-full text-black mb-2">
-
-<select id="cat" class="w-full text-black mb-2">
-<option value="burgers">Burgers</option>
-<option value="tacos">Tacos</option>
-<option value="papas">Papas</option>
-<option value="bebidas">Bebidas</option>
-<option value="postres">Postres</option>
-</select>
-
-<button onclick="saveProduct()" class="bg-green-500 w-full mb-2">Guardar</button>
-<button onclick="closeAdmin()" class="bg-red-500 w-full mb-2">Cerrar</button>
-
-<div id="adminList"></div>
 </div>
 
 <script>
 
-let PASSWORD="1234";
-
-let products = JSON.parse(localStorage.getItem("products")) || [
-
-{
-category:"burgers",
-name:"Clásica",
-price:90,
-desc:"Queso",
-img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd",
-active:true,
-extras:[
-{name:"Queso",price:15},
-{name:"Tocino",price:20},
-{name:"Extra carne",price:30}
-]
-},
-
-{
-category:"tacos",
-name:"Pastor",
-price:70,
-desc:"Con piña",
-img:"https://images.unsplash.com/photo-1600891964599-f61ba0e24092",
-active:true,
-extras:[
-{name:"Queso",price:10},
-{name:"Doble carne",price:25},
-{name:"Sin cebolla",price:0}
-]
-},
-
-{
-category:"bebidas",
-name:"Refresco",
-price:25,
-desc:"600ml",
-img:"https://images.unsplash.com/photo-1581006852262-e4307cf6283a",
-active:true,
-extras:[
-{name:"Hielo extra",price:0},
-{name:"Limón",price:5}
-]
-}
-
+// PRODUCTOS
+let products=[
+{name:"Clásica",price:90,img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd"},
+{name:"Doble",price:120,img:"https://images.unsplash.com/photo-1550547660-d9450f859349"},
+{name:"BBQ",price:130,img:"https://images.unsplash.com/photo-1606755962773-d324e0a13086"}
 ];
 
 while(products.length<25){
-products.push({...products[products.length%3]});
+products.push({...products[products.length%3],name:"Producto "+products.length});
 }
 
 let cart=[];
-let selectedProduct=null;
-let ubicacion="";
-let editIndex=null;
 
+// ENTRAR
 function enterMenu(){
 home.style.display="none";
 menu.classList.remove("hidden");
 renderProducts();
 }
 
-function renderProducts(cat="all"){
+// RENDER
+function renderProducts(){
 let html="";
 products.forEach((p,i)=>{
-if((cat==="all"||p.category===cat) && p.active){
 html+=`
-<div onclick="openModal(${i})" class="card bg-black bg-opacity-70 p-3 rounded">
-<img src="${p.img}" class="w-full h-32 object-cover">
+<div class="card glass p-3 rounded">
+<img src="${p.img}" class="w-full h-32 object-cover rounded">
 <h3>${p.name}</h3>
 <p>$${p.price}</p>
+<button onclick="addToCart(${i})" class="bg-green-500 w-full mt-2">Agregar</button>
 </div>`;
-}
 });
-document.getElementById("products").innerHTML=html;
+productsDiv=document.getElementById("products");
+productsDiv.innerHTML=html;
 }
 
-function openModal(i){
-selectedProduct=products[i];
-
-document.getElementById("modal").classList.remove("hidden");
-
-modalName.innerText=selectedProduct.name;
-modalDesc.innerText=selectedProduct.desc;
-
-let html="";
-selectedProduct.extras.forEach(e=>{
-html+=`
-<label>
-<input type="checkbox" value="${e.name}" data-price="${e.price}">
-${e.name} +$${e.price}
-</label><br>`;
-});
-
-extras.innerHTML=html;
-}
-
-function closeModal(){
-modal.classList.add("hidden");
-}
-
-function confirmAdd(){
-let total=selectedProduct.price;
-let name=selectedProduct.name;
-
-document.querySelectorAll("#extras input").forEach(e=>{
-if(e.checked){
-let price=parseInt(e.dataset.price);
-total+=price;
-name+=` + ${e.value}`;
-}
-});
-
-cart.push({name,price:total});
+// AGREGAR
+function addToCart(i){
+cart.push(products[i]);
 updateCart();
-closeModal();
 }
 
+// ACTUALIZAR
 function updateCart(){
 let html="";
 let total=0;
 
-cart.forEach(p=>{
-html+=`${p.name} $${p.price}<br>`;
-total+=p.price;
-});
-
-cartItems.innerHTML=html;
-totalEl.innerText="$"+total;
-count.innerText=cart.length;
-}
-
-function toggleCart(){
-cartPanel.classList.toggle("hidden");
-}
-
-function getLocation(){
-navigator.geolocation.getCurrentPosition(pos=>{
-ubicacion=`https://maps.google.com?q=${pos.coords.latitude},${pos.coords.longitude}`;
-alert("Ubicación lista 📍");
-});
-}
-
-function sendWhatsApp(){
-
-let msg="🔥 Pedido:%0A";
-let total=0;
-
-cart.forEach(p=>{
-msg+=`${p.name} $${p.price}%0A`;
-total+=p.price;
-});
-
-msg+=`%0ATotal: $${total}`;
-msg+=`%0ADirección: ${direccion.value}`;
-msg+=`%0AUbicación: ${ubicacion}`;
-msg+=`%0AMétodo: ${metodoPago.value}`;
-msg+=`%0APagaré con: $${cambio.value}`;
-
-window.open("https://wa.me/5215550572742?text="+msg);
-}
-
-function showLogin(){loginBox.classList.remove("hidden");}
-
-function login(){
-if(passInput.value===PASSWORD){
-loginBox.classList.add("hidden");
-adminPanel.classList.remove("hidden");
-renderAdmin();
-}
-}
-
-function renderAdmin(){
-let html="";
-products.forEach((p,i)=>{
+cart.forEach((p,i)=>{
 html+=`
-<div class="bg-gray-800 p-2 mb-2">
-${p.name}
-<button onclick="editProduct(${i})">✏️</button>
-<button onclick="toggleActive(${i})">${p.active?"❌":"✔️"}</button>
-<button onclick="deleteProduct(${i})">🗑️</button>
+<div class="flex justify-between items-center">
+<span>${p.name} $${p.price}</span>
+<button onclick="removeItem(${i})">❌</button>
 </div>`;
+total+=p.price;
 });
-adminList.innerHTML=html;
+
+document.getElementById("cartItems").innerHTML=html;
+document.getElementById("total").innerText="Total: $"+total;
+document.getElementById("count").innerText=cart.length;
 }
 
-function toggleActive(i){
-products[i].active=!products[i].active;
-save();
-renderProducts();
-renderAdmin();
+// ELIMINAR
+function removeItem(i){
+cart.splice(i,1);
+updateCart();
 }
 
-function deleteProduct(i){
-products.splice(i,1);
-save();
-renderProducts();
-renderAdmin();
+// CARRITO
+function openCart(){
+cartPanel.classList.remove("hidden");
+overlay.style.display="block";
 }
 
-function editProduct(i){
-let p=products[i];
-nombre.value=p.name;
-precio.value=p.price;
-desc.value=p.desc;
-cat.value=p.category;
-editIndex=i;
+function closeCart(){
+cartPanel.classList.add("hidden");
+overlay.style.display="none";
 }
 
-function saveProduct(){
-let p={
-name:nombre.value,
-price:parseInt(precio.value),
-desc:desc.value,
-img:products[editIndex]?.img,
-category:cat.value,
-active:true,
-extras:[{name:"Extra",price:10}]
-};
-
-if(editIndex!==null){
-products[editIndex]=p;
-}else{
-products.push(p);
-}
-
-save();
-renderProducts();
-renderAdmin();
-editIndex=null;
-}
-
-function save(){
-localStorage.setItem("products",JSON.stringify(products));
-}
-
-function closeAdmin(){
-adminPanel.classList.add("hidden");
+// WHATS
+function sendWhatsApp(){
+let msg="Pedido:%0A";
+cart.forEach(p=>msg+=`${p.name} $${p.price}%0A`);
+msg+=`Dirección: ${direccion.value}`;
+window.open("https://wa.me/5215550572742?text="+msg);
 }
 
 </script>
