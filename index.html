@@ -19,6 +19,10 @@ body{margin:0;font-family:sans-serif}
 </head>
 
 <body class="text-white">
+<button id="installBtn"
+class="fixed bottom-20 left-4 bg-green-500 text-white px-3 py-2 rounded-full shadow-lg z-40 text-sm">
+📲 Agrégame
+</button>
 
 <div class="fallback"></div>
 
@@ -112,7 +116,8 @@ body{margin:0;font-family:sans-serif}
 <input id="nombre" placeholder="Nombre" class="text-black">
 <input id="precio" placeholder="Precio" class="text-black">
 <input id="desc" placeholder="Descripción" class="text-black">
-
+<input type="file" id="imgFile" accept="image/*" class="text-white mt-2">
+  
 <button onclick="addProduct()">Agregar</button>
 <button onclick="closeAdmin()" class="bg-red-500 mt-2 px-3 py-1">Salir</button>
 
@@ -253,6 +258,46 @@ renderAdmin();
 }
 
 function addProduct(){
+
+let file = document.getElementById("imgFile").files[0];
+
+if(file){
+let reader = new FileReader();
+
+reader.onload = function(e){
+
+products.push({
+name:nombre.value,
+price:parseInt(precio.value),
+desc:desc.value,
+cat:"burger",
+img:e.target.result,
+extras:[]
+});
+
+renderProducts();
+renderAdmin();
+
+};
+
+reader.readAsDataURL(file);
+
+}else{
+
+products.push({
+name:nombre.value,
+price:parseInt(precio.value),
+desc:desc.value,
+cat:"burger",
+img:"https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=80",
+extras:[]
+});
+
+renderProducts();
+renderAdmin();
+
+}
+}
 products.push({
 name:nombre.value,
 price:parseInt(precio.value),
@@ -283,6 +328,24 @@ msg+=`Pago con: ${cambio.value}`;
 window.open("https://wa.me/5215550572742?text="+msg);
 }
 
+let deferredPrompt;
+
+window.addEventListener("beforeinstallprompt",(e)=>{
+e.preventDefault();
+deferredPrompt=e;
+});
+
+installBtn.addEventListener("click", async ()=>{
+
+if(deferredPrompt){
+deferredPrompt.prompt();
+deferredPrompt=null;
+
+}else{
+alert("📲 Agrégame a tu pantalla de inicio\n\nEn iPhone:\n1. Presiona compartir 📤\n2. 'Agregar a pantalla de inicio'\n\nEn Android aparecerá automáticamente");
+}
+
+});
 </script>
 
 </body>
