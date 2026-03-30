@@ -129,7 +129,27 @@ body{margin:0;font-family:sans-serif}
 
 <script>
 
-let products=[];
+let products=[
+{cat:"burger",name:"🔥 Smash Infernal",price:95,desc:"Carne jugosa con queso derretido y ese toque ahumado brutal 🤤",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd",extras:[{name:"Queso extra",price:15},{name:"Tocino",price:20}],active:true},
+
+{cat:"burger",name:"💣 Doble Explosiva",price:130,desc:"Doble carne, doble queso… puro vicio 🔥",img:"https://images.unsplash.com/photo-1550547660-d9450f859349",extras:[{name:"Extra carne",price:30}],active:true},
+
+{cat:"tacos",name:"🌮 Pastor Supremo",price:75,desc:"Trompo jugoso con piña caramelizada irresistible 😮‍🔥",img:"https://images.unsplash.com/photo-1600891964599-f61ba0e24092",extras:[{name:"Queso",price:10}],active:true},
+
+{cat:"papas",name:"🍟 Papas Extremas",price:85,desc:"Crujientes con queso y tocino… adicción pura 🤤",img:"https://images.unsplash.com/photo-1576107232684-1279f390859f",extras:[{name:"Queso extra",price:15}],active:true},
+
+{cat:"bebidas",name:"🥤 Refresco Helado",price:25,desc:"El complemento perfecto para tu burger 🧊",img:"https://images.unsplash.com/photo-1581006852262-e4307cf6283a",extras:[],active:true},
+
+{cat:"postres",name:"🍰 Cheesecake Cremoso",price:60,desc:"Suave, dulce y peligrosamente delicioso 😏",img:"https://images.unsplash.com/photo-1578985545062-69928b1d9587",extras:[],active:true}
+];
+while(products.length<25){
+let base=products[products.length%6];
+products.push({
+...base,
+name:base.name+" "+products.length,
+price:base.price+Math.floor(Math.random()*20)
+});
+}
 let cart=[];
 let selectedProduct=null;
 let ubicacion="";
