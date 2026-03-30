@@ -114,6 +114,12 @@ body{margin:0;font-family:sans-serif}
 <input id="precio" placeholder="Precio" class="text-black">
 <input id="desc" placeholder="Descripción" class="text-black">
 
+<!-- EXTRAS -->
+<input id="extraNombre" placeholder="Extra (ej: queso)" class="text-black mt-2">
+<input id="extraPrecio" placeholder="Precio extra" class="text-black mt-2">
+<button onclick="addExtra()">Agregar extra</button>
+<div id="listaExtras"></div>
+
 <button onclick="addProduct()">Agregar producto</button>
 <button onclick="closeAdmin()" class="bg-red-500 mt-2 px-3 py-1">Salir</button>
 
@@ -123,33 +129,33 @@ body{margin:0;font-family:sans-serif}
 
 <script>
 
-// PRODUCTOS PRO
-let products=[
-{cat:"burger",name:"🔥 Smash Infernal",price:95,desc:"Carne jugosa con queso derretido y ese toque ahumado que te hace volver 🤤",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd",extras:[{name:"Queso extra",price:15},{name:"Tocino",price:20}],active:true},
+let products=[];
+let cart=[];
+let selectedProduct=null;
+let ubicacion="";
+let extrasTemp=[];
 
-{cat:"burger",name:"💣 Doble Explosiva",price:130,desc:"Doble carne, doble queso… doble placer 🔥",img:"https://images.unsplash.com/photo-1550547660-d9450f859349",extras:[{name:"Extra carne",price:30}],active:true},
+// EXTRAS PANEL
+function addExtra(){
+if(!extraNombre.value || !extraPrecio.value) return;
 
-{cat:"tacos",name:"🌮 Pastor Supremo",price:75,desc:"Trompo jugoso con piña caramelizada irresistible 😮‍🔥",img:"https://images.unsplash.com/photo-1600891964599-f61ba0e24092",extras:[{name:"Queso",price:10}],active:true},
-
-{cat:"papas",name:"🍟 Papas Extremas",price:85,desc:"Crujientes bañadas en queso y tocino… pura adicción 🤤",img:"https://images.unsplash.com/photo-1576107232684-1279f390859f",extras:[{name:"Queso extra",price:15}],active:true},
-
-{cat:"bebidas",name:"🥤 Refresco Helado",price:25,desc:"El complemento perfecto para tu antojo 🧊",img:"https://images.unsplash.com/photo-1581006852262-e4307cf6283a",extras:[],active:true},
-
-{cat:"postres",name:"🍰 Cheesecake Cremoso",price:60,desc:"Suave, dulce y peligrosamente delicioso 😏",img:"https://images.unsplash.com/photo-1578985545062-69928b1d9587",extras:[],active:true}
-];
-
-// completar hasta 25 únicos
-while(products.length<25){
-let base=products[products.length%6];
-products.push({
-...base,
-name:base.name+" "+products.length,
-price:base.price+Math.floor(Math.random()*20),
-desc:base.desc+" 🔥 edición especial"
+extrasTemp.push({
+name:extraNombre.value,
+price:parseInt(extraPrecio.value)
 });
+
+extraNombre.value="";
+extraPrecio.value="";
+renderExtras();
 }
 
-let cart=[],selectedProduct=null,ubicacion="";
+function renderExtras(){
+let html="";
+extrasTemp.forEach(e=>{
+html+=`${e.name} +$${e.price}<br>`;
+});
+listaExtras.innerHTML=html;
+}
 
 // MENU
 function enterMenu(){home.style.display="none";menu.classList.remove("hidden");renderProducts();}
@@ -172,7 +178,6 @@ class="bg-orange-500 w-10 h-10 flex items-center justify-center rounded text-whi
 </div>`;
 }
 });
-products.innerHTML=html;
 document.getElementById("products").innerHTML=html;
 }
 
@@ -230,10 +235,23 @@ function renderAdmin(){
 let html="";
 products.forEach((p,i)=>{
 html+=`
-${p.name}
+<div style="margin-bottom:10px;border-bottom:1px solid gray;padding:5px;">
+<strong>${p.name}</strong>
+
+<div style="margin-top:5px;display:flex;gap:5px;">
 <button onclick="deleteP(${i})">❌</button>
-<button onclick="toggleP(${i})">${p.active?"Desactivar":"Activar"}</button>
-<button onclick="editP(${i})">Editar</button><br>`;
+
+<button onclick="toggleP(${i})"
+style="background:${p.active?'green':'gray'};color:white;padding:3px 8px;border-radius:20px;">
+${p.active?'ON':'OFF'}
+</button>
+
+<button onclick="editP(${i})"
+style="background:orange;color:white;padding:3px 8px;border-radius:5px;">
+✏️
+</button>
+</div>
+</div>`;
 });
 adminList.innerHTML=html;
 }
@@ -244,6 +262,25 @@ function editP(i){
 nombre.value=products[i].name;
 precio.value=products[i].price;
 desc.value=products[i].desc;
+extrasTemp=products[i].extras||[];
+renderExtras();
+}
+
+function addProduct(){
+products.push({
+cat:"burger",
+name:nombre.value,
+price:parseInt(precio.value),
+desc:desc.value,
+img:"https://images.unsplash.com/photo-1550547660-d9450f859349",
+extras:extrasTemp,
+active:true
+});
+
+extrasTemp=[];
+renderExtras();
+renderProducts();
+renderAdmin();
 }
 
 // GEO
