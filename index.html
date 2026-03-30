@@ -312,8 +312,34 @@ ubicacion=`https://maps.google.com?q=${pos.coords.latitude},${pos.coords.longitu
 
 // WHATS
 function sendWhatsApp(){
+
 let msg="Pedido:%0A";
 let total=0;
+
+cart.forEach(p=>{
+msg+=`${p.name} $${p.price}%0A`;
+total+=p.price;
+});
+
+// 👇 FORZAMOS lectura correcta
+let pago = Number(document.getElementById("cambio").value);
+if(isNaN(pago)) pago = 0;
+
+// 👇 cálculo correcto
+let cambioFinal = pago - total;
+if(cambioFinal < 0) cambioFinal = 0;
+
+// 👇 mensaje bien armado
+msg+=`Total: $${total}%0A`;
+msg+=`Pagará con: $${pago}%0A`;
+msg+=`Cambio: $${cambioFinal}%0A`;
+msg+=`Método: ${metodoPago.value}%0A`;
+msg+=`Ubicación: ${ubicacion}%0A`;
+msg+=`Dirección: ${direccion.value}`;
+
+window.open("https://wa.me/5215550572742?text="+msg);
+
+}
 
 cart.forEach(p=>{
 msg+=`${p.name} $${p.price}%0A`;
