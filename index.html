@@ -27,17 +27,15 @@ z-index:-1;
 
 <body class="text-white font-sans">
 
-<!-- VIDEO FONDO -->
+<!-- VIDEO -->
 <video autoplay muted loop class="video-bg">
-<source src="https://cdn.coverr.co/videos/coverr-grilling-burger-5171/1080p.mp4">
+<source src="https://cdn.coverr.co/videos/coverr-burger-on-grill-1578/1080p.mp4">
 </video>
 
-<!-- PANTALLA INICIO -->
+<!-- INICIO -->
 <div id="home" class="h-screen flex flex-col justify-center items-center bg-black bg-opacity-60">
 <h1 class="text-4xl font-bold mb-4">🔥 Smash House</h1>
-<button onclick="enterMenu()" class="bg-yellow-500 px-6 py-3 rounded text-black">
-Ver menú
-</button>
+<button onclick="enterMenu()" class="bg-yellow-500 px-6 py-3 rounded text-black">Ver menú</button>
 </div>
 
 <!-- MENÚ -->
@@ -45,6 +43,13 @@ Ver menú
 
 <div class="p-4 text-center bg-black bg-opacity-80">
 <h1 class="text-2xl">🍔 Menú</h1>
+</div>
+
+<!-- INFO -->
+<div class="p-3 text-center bg-black bg-opacity-70 text-sm">
+⭐ 4.8 (320 reseñas) <br>
+📍 Ecatepec, México <br>
+💬 “Las mejores burgers 🔥”
 </div>
 
 <button onclick="showLogin()" class="fixed top-5 right-5 bg-yellow-500 px-3 py-1 rounded">⚙️</button>
@@ -75,10 +80,24 @@ Ver menú
 
 <button onclick="getLocation()" class="bg-blue-500 w-full mt-2">Ubicación 📍</button>
 <input id="direccion" placeholder="Dirección" class="w-full text-black mt-2">
+<input id="cambio" placeholder="¿Con cuánto pagarás?" class="w-full text-black mt-2">
 
 <button onclick="sendWhatsApp()" class="bg-green-500 w-full mt-2">Enviar pedido</button>
 </div>
 
+</div>
+
+<!-- MODAL PRODUCTO -->
+<div id="modal" class="fixed inset-0 bg-black bg-opacity-90 hidden flex items-center justify-center">
+<div class="bg-gray-900 p-4 rounded w-11/12">
+<h2 id="modalName"></h2>
+<p id="modalDesc"></p>
+
+<div id="extras"></div>
+
+<button onclick="confirmAdd()" class="bg-green-500 w-full mt-2">Agregar</button>
+<button onclick="closeModal()" class="mt-2 text-red-400">Cerrar</button>
+</div>
 </div>
 
 <!-- LOGIN -->
@@ -89,9 +108,10 @@ Ver menú
 </div>
 </div>
 
-<!-- PANEL ADMIN -->
+<!-- PANEL -->
 <div id="adminPanel" class="fixed inset-0 bg-black hidden p-4 overflow-y-auto">
-<h2 class="text-xl mb-3">Panel Admin</h2>
+
+<h2>Panel Admin</h2>
 
 <input id="nombre" placeholder="Nombre" class="w-full text-black mb-2">
 <input id="precio" type="number" placeholder="Precio" class="w-full text-black mb-2">
@@ -116,24 +136,22 @@ Ver menú
 
 let PASSWORD="1234";
 
-// 25 PRODUCTOS
+// PRODUCTOS
 let products = JSON.parse(localStorage.getItem("products")) || [
 {category:"burgers",name:"Clásica",price:90,desc:"Queso",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd",active:true},
-{category:"burgers",name:"Doble",price:120,desc:"Doble carne",img:"https://images.unsplash.com/photo-1550547660-d9450f859349",active:true},
 {category:"tacos",name:"Pastor",price:70,desc:"Con piña",img:"https://images.unsplash.com/photo-1600891964599-f61ba0e24092",active:true},
-{category:"papas",name:"Papas clásicas",price:50,desc:"Crujientes",img:"https://images.unsplash.com/photo-1576107232684-1279f390859f",active:true},
-{category:"bebidas",name:"Refresco",price:25,desc:"600ml",img:"https://images.unsplash.com/photo-1581006852262-e4307cf6283a",active:true},
-{category:"postres",name:"Brownie",price:45,desc:"Chocolate",img:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c",active:true}
+{category:"bebidas",name:"Refresco",price:25,desc:"600ml",img:"https://images.unsplash.com/photo-1581006852262-e4307cf6283a",active:true}
 ];
 
-// DUPLICAR HASTA 25
+// COMPLETAR A 25
 while(products.length<25){
-products.push({...products[products.length%6],name:products[products.length%6].name+" "+products.length,active:true});
+products.push({...products[products.length%3],name:products[products.length%3].name+" "+products.length,active:true});
 }
 
 let cart=[];
 let editIndex=null;
 let ubicacion="";
+let selectedProduct=null;
 
 // ENTRAR
 function enterMenu(){
@@ -148,33 +166,69 @@ let html="";
 products.forEach((p,i)=>{
 if((cat==="all"||p.category===cat) && p.active){
 html+=`
-<div onclick="addToCart(${i})" class="card bg-black bg-opacity-70 p-3 rounded">
+<div onclick="openModal(${i})" class="card bg-black bg-opacity-70 p-3 rounded">
 <img src="${p.img}" class="w-full h-32 object-cover">
 <h3>${p.name}</h3>
 <p>$${p.price}</p>
 </div>`;
 }
 });
-products.innerHTML=html;
 document.getElementById("products").innerHTML=html;
 }
 
-// CARRITO
-function addToCart(i){
-cart.push(products[i]);
-updateCart();
+// MODAL
+function openModal(i){
+selectedProduct=products[i];
+modal.classList.remove("hidden");
+
+modalName.innerText=selectedProduct.name;
+modalDesc.innerText=selectedProduct.desc;
+
+extras.innerHTML=`
+<label><input type="checkbox" value="queso"> Queso +$15</label><br>
+<label><input type="checkbox" value="tocino"> Tocino +$20</label><br>
+<label><input type="checkbox" value="carne"> Extra carne +$30</label>
+`;
 }
 
+function closeModal(){
+modal.classList.add("hidden");
+}
+
+function confirmAdd(){
+let total=selectedProduct.price;
+let name=selectedProduct.name;
+
+document.querySelectorAll("#extras input").forEach(e=>{
+if(e.checked){
+if(e.value==="queso"){total+=15; name+=" + queso";}
+if(e.value==="tocino"){total+=20; name+=" + tocino";}
+if(e.value==="carne"){total+=30; name+=" + carne";}
+}
+});
+
+cart.push({name,price:total});
+updateCart();
+closeModal();
+}
+
+// CARRITO
 function updateCart(){
 let html="";
 let total=0;
+
 cart.forEach(p=>{
 html+=`${p.name} $${p.price}<br>`;
 total+=p.price;
 });
+
 cartItems.innerHTML=html;
 totalEl.innerText="$"+total;
 count.innerText=cart.length;
+}
+
+function toggleCart(){
+cartPanel.classList.toggle("hidden");
 }
 
 // UBICACIÓN
@@ -188,9 +242,13 @@ alert("Ubicación lista 📍");
 // WHATS
 function sendWhatsApp(){
 let msg="Pedido:%0A";
+
 cart.forEach(p=>msg+=`${p.name} $${p.price}%0A`);
-msg+=`%0A${direccion.value}`;
-msg+=`%0A${ubicacion}`;
+
+msg+=`%0ADirección: ${direccion.value}`;
+msg+=`%0AUbicación: ${ubicacion}`;
+msg+=`%0APagaré con: $${cambio.value}`;
+
 window.open("https://wa.me/5215550572742?text="+msg);
 }
 
@@ -242,24 +300,12 @@ cat.value=p.category;
 editIndex=i;
 }
 
-async function saveProduct(){
-let imgData=products[editIndex]?.img || "";
-
-if(imgFile.files[0]){
-let reader=new FileReader();
-reader.onload=()=>{imgData=reader.result;saveFinal(imgData);}
-reader.readAsDataURL(imgFile.files[0]);
-}else{
-saveFinal(imgData);
-}
-}
-
-function saveFinal(imgData){
+function saveProduct(){
 let p={
 name:nombre.value,
 price:parseInt(precio.value),
 desc:desc.value,
-img:imgData,
+img:products[editIndex]?.img,
 category:cat.value,
 active:true
 };
