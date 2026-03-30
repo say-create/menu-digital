@@ -20,11 +20,7 @@ body{margin:0;font-family:sans-serif}
 
 <body class="text-white">
 
-<button id="installBtn"
-class="fixed bottom-20 left-4 bg-green-500 text-white px-3 py-2 rounded-full shadow-lg z-40 text-sm"
-style="pointer-events:auto;">
-📲
-</button>
+<button id="installBtn" class="fixed bottom-20 left-4 bg-green-500 px-3 py-2 rounded-full z-50">📲</button>
 
 <div class="fallback"></div>
 
@@ -36,10 +32,7 @@ style="pointer-events:auto;">
 <div id="home" class="h-screen flex flex-col justify-center items-center glass">
 <h1 class="text-5xl font-bold mb-4">🔥 Smash House</h1>
 <p class="mb-4">Las burgers más brutales de tu zona 🍔</p>
-<button onclick="enterMenu()"
-class="bg-yellow-500 px-6 py-3 rounded text-black">
-Ver menú
-</button>
+<button onclick="enterMenu()" class="bg-yellow-500 px-6 py-3 rounded text-black">Ver menú</button>
 </div>
 
 <!-- MENU -->
@@ -61,33 +54,22 @@ Ver menú
 
 <div id="products" class="p-4 grid gap-4"></div>
 
-<!-- CARRITO -->
 <div class="fixed bottom-5 right-5 z-50">
-<button onclick="openCart()" class="bg-green-500 p-4 rounded-full shadow-lg">
+<button onclick="openCart()" class="bg-green-500 p-4 rounded-full">
 🛒 <span id="count">0</span>
 </button>
 </div>
 
 <div id="overlay" class="overlay" onclick="closeCart()"></div>
 
-<div id="cartPanel" class="fixed bottom-0 left-0 right-0 bg-black p-4 hidden z-50 max-h-[70vh] overflow-y-auto">
-<div class="flex justify-between">
+<div id="cartPanel" class="fixed bottom-0 left-0 right-0 bg-black p-4 hidden z-50">
 <h2>Tu pedido</h2>
-<button onclick="closeCart()">✖</button>
-</div>
-
 <div id="cartItems"></div>
 <p id="total"></p>
 
 <button onclick="getLocation()" class="bg-blue-500 w-full mt-2">Ubicación 📍</button>
-
 <input id="direccion" placeholder="Dirección" class="w-full text-black mt-2">
 <input id="cambio" placeholder="¿Con cuánto pagarás?" class="w-full text-black mt-2">
-
-<select id="metodoPago" class="w-full text-black mt-2">
-<option>Efectivo</option>
-<option>Transferencia</option>
-</select>
 
 <button onclick="sendWhatsApp()" class="bg-green-500 w-full mt-2">Enviar pedido</button>
 </div>
@@ -100,7 +82,6 @@ Ver menú
 <h2 id="modalName"></h2>
 <p id="modalDesc"></p>
 <div id="extras"></div>
-
 <button onclick="confirmAdd()" class="bg-green-500 w-full mt-2">Agregar</button>
 <button onclick="closeModal()" class="text-red-400 mt-2">Cerrar</button>
 </div>
@@ -119,9 +100,13 @@ Ver menú
 <input id="nombre" placeholder="Nombre" class="text-black">
 <input id="precio" placeholder="Precio" class="text-black">
 <input id="desc" placeholder="Descripción" class="text-black">
-<input type="file" id="imgFile" accept="image/*" class="text-white mt-2">
-  
-<button onclick="addProduct()">Agregar</button>
+
+<input id="extraNombre" placeholder="Extra" class="text-black mt-2">
+<input id="extraPrecio" placeholder="Precio extra" class="text-black mt-2">
+<button onclick="addExtra()">Agregar Extra</button>
+<div id="listaExtras"></div>
+
+<button onclick="addProduct()">Agregar Producto</button>
 <button onclick="closeAdmin()" class="bg-red-500 mt-2 px-3 py-1">Salir</button>
 
 <div id="adminList"></div>
@@ -130,24 +115,24 @@ Ver menú
 
 <script>
 
-// PRODUCTOS
-let products = [
-{cat:"burger",name:"🔥 Smash Clásica",price:90,desc:"Carne jugosa con queso derretido brutal.",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80",extras:[{name:"Queso",price:15},{name:"Tocino",price:20}]},
-{cat:"tacos",name:"🌮 Pastor Supremo",price:70,desc:"Con piña caramelizada irresistible.",img:"https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=800&q=80",extras:[]}
+let extrasTemp=[];
+
+let products=[
+{cat:"burger",name:"🔥 Smash Infernal",price:95,desc:"Carne jugosa con queso derretido brutal 🔥",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd",extras:[{name:"Queso",price:15}]},
+{cat:"tacos",name:"🌮 Pastor Supremo",price:75,desc:"Piña caramelizada irresistible 🌮",img:"https://images.unsplash.com/photo-1600891964599-f61ba0e24092",extras:[{name:"Queso",price:10}]},
+{cat:"papas",name:"🍟 Papas Extremas",price:85,desc:"Crujientes con queso y tocino 😮‍🔥",img:"https://images.unsplash.com/photo-1576107232684-1279f390859f",extras:[{name:"Extra queso",price:15}]},
+{cat:"bebidas",name:"🥤 Refresco Helado",price:25,desc:"Perfecto para acompañar 🧊",img:"https://images.unsplash.com/photo-1581006852262-e4307cf6283a",extras:[]},
+{cat:"postres",name:"🍰 Cheesecake",price:60,desc:"Suave y delicioso 🤤",img:"https://images.unsplash.com/photo-1578985545062-69928b1d9587",extras:[]}
 ];
 
-while(products.length < 25){
-let base = products[products.length % 2];
-products.push({...base,name:base.name+" "+products.length,price:base.price+10});
+while(products.length<25){
+let b=products[products.length%5];
+products.push({...b,name:b.name+" "+products.length,price:b.price+10});
 }
 
 let cart=[],selectedProduct=null,ubicacion="";
 
-function enterMenu(){
-home.style.display="none";
-menu.classList.remove("hidden");
-renderProducts();
-}
+function enterMenu(){home.style.display="none";menu.classList.remove("hidden");renderProducts();}
 
 function renderProducts(cat="all"){
 let html="";
@@ -158,11 +143,10 @@ html+=`
 <img src="${p.img}" class="w-full h-32 object-cover rounded">
 <h3>${p.name}</h3>
 <p>${p.desc}</p>
-<p class="text-green-400 font-bold">$${p.price}</p>
-<button onclick="openModal(${i})" class="bg-orange-500 w-10 h-10 rounded text-white text-xl mt-2">+</button>
+<p class="text-green-400">$${p.price}</p>
+<button onclick="openModal(${i})" class="bg-orange-500 w-10 h-10 rounded text-white">+</button>
 </div>`;
 }});
-products.innerHTML=html;
 document.getElementById("products").innerHTML=html;
 }
 
@@ -171,10 +155,12 @@ selectedProduct=products[i];
 modal.classList.remove("hidden");
 modalName.innerText=selectedProduct.name;
 modalDesc.innerText=selectedProduct.desc;
-extras.innerHTML="";
+
+let html="";
 selectedProduct.extras.forEach(e=>{
-extras.innerHTML+=`<label><input type="checkbox" data-price="${e.price}"> ${e.name}</label><br>`;
+html+=`<label><input type="checkbox" data-price="${e.price}"> ${e.name} +$${e.price}</label><br>`;
 });
+extras.innerHTML=html;
 }
 
 function closeModal(){modal.classList.add("hidden");}
@@ -205,21 +191,42 @@ function removeItem(i){cart.splice(i,1);updateCart();}
 function openCart(){cartPanel.classList.remove("hidden");overlay.style.display="block";}
 function closeCart(){cartPanel.classList.add("hidden");overlay.style.display="none";}
 
+// ADMIN
 function showAdmin(){admin.classList.remove("hidden");}
 function closeAdmin(){admin.classList.add("hidden");}
 
-function login(){if(pass.value==="1234"){panel.classList.remove("hidden");}}
+function login(){if(pass.value==="1234"){panel.classList.remove("hidden");renderAdmin();}}
+
+function renderAdmin(){
+let html="";
+products.forEach((p,i)=>{
+html+=`${p.name} <button onclick="deleteP(${i})">❌</button><br>`;
+});
+adminList.innerHTML=html;
+}
+
+function deleteP(i){products.splice(i,1);renderProducts();renderAdmin();}
+
+function addExtra(){
+extrasTemp.push({name:extraNombre.value,price:parseInt(extraPrecio.value)});
+let html="";
+extrasTemp.forEach(e=>html+=`${e.name} +$${e.price}<br>`);
+listaExtras.innerHTML=html;
+}
 
 function addProduct(){
-let file=document.getElementById("imgFile").files[0];
-if(file){
-let reader=new FileReader();
-reader.onload=e=>{
-products.push({name:nombre.value,price:+precio.value,desc:desc.value,cat:"burger",img:e.target.result,extras:[]});
+products.push({
+name:nombre.value,
+price:parseInt(precio.value),
+desc:desc.value,
+cat:"burger",
+img:"https://images.unsplash.com/photo-1550547660-d9450f859349",
+extras:extrasTemp
+});
+extrasTemp=[];
+listaExtras.innerHTML="";
 renderProducts();
-};
-reader.readAsDataURL(file);
-}
+renderAdmin();
 }
 
 // GEO
@@ -237,20 +244,16 @@ msg+=`Ubicación: ${ubicacion}`;
 window.open("https://wa.me/5215550572742?text="+msg);
 }
 
-// INSTALAR APP
+// INSTALL
 let deferredPrompt;
-
 window.addEventListener("beforeinstallprompt",(e)=>{
 e.preventDefault();
 deferredPrompt=e;
 });
 
 installBtn.addEventListener("click",()=>{
-if(deferredPrompt){
-deferredPrompt.prompt();
-}else{
-alert("📲 Agrégame a tu pantalla de inicio\n\n1. Compartir 📤\n2. Agregar a inicio");
-}
+if(deferredPrompt){deferredPrompt.prompt();}
+else{alert("📲 Agrégame a tu pantalla de inicio");}
 });
 
 </script>
