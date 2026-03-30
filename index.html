@@ -10,7 +10,7 @@
 <style>
 body{margin:0;font-family:sans-serif}
 .video-bg{position:fixed;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:-2;}
-.fallback{position:fixed;top:0;left:0;width:100%;height:100%;background:url('https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=800&q=80') center/cover;z-index:-3;}
+.fallback{position:fixed;top:0;left:0;width:100%;height:100%;background:url('https://images.unsplash.com/photo-1550547660-d9450f859349') center/cover;z-index:-3;}
 .glass{background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);}
 .card:hover{transform:scale(1.05)}
 .overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);display:none;z-index:40;}
@@ -30,7 +30,8 @@ body{margin:0;font-family:sans-serif}
 <!-- HOME -->
 <div id="home" class="h-screen flex flex-col justify-center items-center glass">
 <h1 class="text-5xl font-bold mb-4">🔥 Smash House</h1>
-<button onclick="enterMenu()" class="bg-yellow-500 px-6 py-3 rounded text-black">Ver menú</button>
+<p>Las burgers más brutales 🍔</p>
+<button onclick="enterMenu()" class="bg-yellow-500 px-6 py-3 rounded text-black mt-4">Ver menú</button>
 </div>
 
 <!-- MENU -->
@@ -41,8 +42,19 @@ body{margin:0;font-family:sans-serif}
 <p>⭐ 4.9 • Ecatepec • +500 reseñas</p>
 </div>
 
+<!-- CATEGORÍAS -->
+<div class="flex gap-2 p-3 overflow-x-auto glass">
+<button onclick="renderProducts('all')" class="bg-yellow-500 px-3 py-1 rounded-full">Todo</button>
+<button onclick="renderProducts('burger')" class="bg-gray-800 px-3 py-1 rounded-full">🍔</button>
+<button onclick="renderProducts('tacos')" class="bg-gray-800 px-3 py-1 rounded-full">🌮</button>
+<button onclick="renderProducts('papas')" class="bg-gray-800 px-3 py-1 rounded-full">🍟</button>
+<button onclick="renderProducts('bebidas')" class="bg-gray-800 px-3 py-1 rounded-full">🥤</button>
+<button onclick="renderProducts('postres')" class="bg-gray-800 px-3 py-1 rounded-full">🍰</button>
+</div>
+
 <div id="products" class="p-4 grid gap-4"></div>
 
+<!-- CARRITO -->
 <div class="fixed bottom-5 right-5 z-50">
 <button onclick="openCart()" class="bg-green-500 p-4 rounded-full">
 🛒 <span id="count">0</span>
@@ -52,9 +64,15 @@ body{margin:0;font-family:sans-serif}
 <div id="overlay" class="overlay" onclick="closeCart()"></div>
 
 <div id="cartPanel" class="fixed bottom-0 left-0 right-0 bg-black p-4 hidden z-50">
+<div class="flex justify-between">
 <h2>Tu pedido</h2>
+<button onclick="closeCart()">✖</button>
+</div>
+
 <div id="cartItems"></div>
 <p id="total"></p>
+
+<button onclick="getLocation()" class="bg-blue-500 w-full mt-2">Ubicación 📍</button>
 
 <input id="direccion" placeholder="Dirección" class="w-full text-black mt-2">
 <input id="cambio" placeholder="¿Con cuánto pagarás?" class="w-full text-black mt-2">
@@ -70,90 +88,111 @@ body{margin:0;font-family:sans-serif}
 </div>
 
 <!-- MODAL -->
-<div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-90 flex justify-center items-center">
+<div id="modal" class="hidden fixed inset-0 bg-black bg-opacity-90 flex items-center justify-center">
 <div class="bg-gray-900 p-4 rounded w-11/12">
 <h2 id="modalName"></h2>
 <p id="modalDesc"></p>
 <div id="extras"></div>
+
 <button onclick="confirmAdd()" class="bg-green-500 w-full mt-2">Agregar</button>
-<button onclick="closeModal()">Cerrar</button>
+<button onclick="closeModal()" class="text-red-400 mt-2">Cerrar</button>
 </div>
 </div>
 
 <!-- ADMIN -->
-<button onclick="showAdmin()" class="fixed top-5 right-5 bg-yellow-500 px-3 py-1">⚙️</button>
+<button onclick="showAdmin()" class="fixed top-5 right-5 bg-yellow-500 px-3 py-1 rounded">⚙️</button>
 
 <div id="admin" class="hidden fixed inset-0 bg-black p-4 overflow-y-auto">
+<h2>Panel Admin</h2>
+
 <input id="pass" type="password" placeholder="Contraseña" class="text-black">
 <button onclick="login()">Entrar</button>
 
-<div id="panel" class="hidden">
+<div id="panel" class="hidden mt-4">
+
 <input id="nombre" placeholder="Nombre" class="text-black">
 <input id="precio" placeholder="Precio" class="text-black">
 <input id="desc" placeholder="Descripción" class="text-black">
 
-<input id="extraNombre" placeholder="Extra">
-<input id="extraPrecio" placeholder="Precio extra">
-<button onclick="addExtra()">Agregar extra</button>
-
-<div id="listaExtras"></div>
-
 <button onclick="addProduct()">Agregar producto</button>
+<button onclick="closeAdmin()" class="bg-red-500 mt-2 px-3 py-1">Salir</button>
 
 <div id="adminList"></div>
-
-<button onclick="closeAdmin()">Salir</button>
 </div>
 </div>
 
 <script>
 
+// PRODUCTOS PRO
 let products=[
-{cat:"burger",name:"🔥 Smash Infernal",price:100,desc:"Jugosa y brutal 🔥",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd",extras:[{name:"Queso",price:15}],active:true}
+{cat:"burger",name:"🔥 Smash Infernal",price:95,desc:"Carne jugosa con queso derretido y ese toque ahumado que te hace volver 🤤",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd",extras:[{name:"Queso extra",price:15},{name:"Tocino",price:20}],active:true},
+
+{cat:"burger",name:"💣 Doble Explosiva",price:130,desc:"Doble carne, doble queso… doble placer 🔥",img:"https://images.unsplash.com/photo-1550547660-d9450f859349",extras:[{name:"Extra carne",price:30}],active:true},
+
+{cat:"tacos",name:"🌮 Pastor Supremo",price:75,desc:"Trompo jugoso con piña caramelizada irresistible 😮‍🔥",img:"https://images.unsplash.com/photo-1600891964599-f61ba0e24092",extras:[{name:"Queso",price:10}],active:true},
+
+{cat:"papas",name:"🍟 Papas Extremas",price:85,desc:"Crujientes bañadas en queso y tocino… pura adicción 🤤",img:"https://images.unsplash.com/photo-1576107232684-1279f390859f",extras:[{name:"Queso extra",price:15}],active:true},
+
+{cat:"bebidas",name:"🥤 Refresco Helado",price:25,desc:"El complemento perfecto para tu antojo 🧊",img:"https://images.unsplash.com/photo-1581006852262-e4307cf6283a",extras:[],active:true},
+
+{cat:"postres",name:"🍰 Cheesecake Cremoso",price:60,desc:"Suave, dulce y peligrosamente delicioso 😏",img:"https://images.unsplash.com/photo-1578985545062-69928b1d9587",extras:[],active:true}
 ];
 
+// completar hasta 25 únicos
 while(products.length<25){
-let b=products[0];
-products.push({...b,name:b.name+" "+products.length,price:b.price+10});
+let base=products[products.length%6];
+products.push({
+...base,
+name:base.name+" "+products.length,
+price:base.price+Math.floor(Math.random()*20),
+desc:base.desc+" 🔥 edición especial"
+});
 }
 
-let cart=[],extrasTemp=[],selectedProduct=null;
+let cart=[],selectedProduct=null,ubicacion="";
 
+// MENU
 function enterMenu(){home.style.display="none";menu.classList.remove("hidden");renderProducts();}
 
-function renderProducts(){
+// RENDER
+function renderProducts(cat="all"){
 let html="";
 products.forEach((p,i)=>{
-if(p.active!==false){
+if((cat==="all"||p.cat===cat)&&p.active){
 html+=`
-<div class="glass p-3">
-<img src="${p.img}" class="w-full h-32 object-cover">
+<div class="glass p-3 rounded">
+<img src="${p.img}" class="w-full h-32 object-cover rounded">
 <h3>${p.name}</h3>
 <p>${p.desc}</p>
 <p class="text-green-400">$${p.price}</p>
-<button onclick="openModal(${i})">+</button>
+
+<button onclick="openModal(${i})"
+class="bg-orange-500 w-10 h-10 flex items-center justify-center rounded text-white text-xl mt-2">+</button>
+
 </div>`;
 }
 });
-productsDiv=document.getElementById("products");
-productsDiv.innerHTML=html;
+products.innerHTML=html;
+document.getElementById("products").innerHTML=html;
 }
 
+// MODAL
 function openModal(i){
 selectedProduct=products[i];
 modal.classList.remove("hidden");
+modalName.innerText=selectedProduct.name;
+modalDesc.innerText=selectedProduct.desc;
 
 let html="";
 selectedProduct.extras.forEach(e=>{
-html+=`<label><input type="checkbox" data-price="${e.price}"> ${e.name}</label><br>`;
+html+=`<label><input type="checkbox" data-price="${e.price}"> ${e.name} +$${e.price}</label><br>`;
 });
 extras.innerHTML=html;
-modalName.innerText=selectedProduct.name;
-modalDesc.innerText=selectedProduct.desc;
 }
 
 function closeModal(){modal.classList.add("hidden");}
 
+// AGREGAR
 function confirmAdd(){
 let total=selectedProduct.price;
 document.querySelectorAll("#extras input").forEach(e=>{
@@ -164,6 +203,7 @@ updateCart();
 closeModal();
 }
 
+// CARRITO
 function updateCart(){
 let html="",total=0;
 cart.forEach((p,i)=>{
@@ -190,9 +230,9 @@ function renderAdmin(){
 let html="";
 products.forEach((p,i)=>{
 html+=`
-${p.name} 
+${p.name}
 <button onclick="deleteP(${i})">❌</button>
-<button onclick="toggleP(${i})">${p.active===false?"Activar":"Desactivar"}</button>
+<button onclick="toggleP(${i})">${p.active?"Desactivar":"Activar"}</button>
 <button onclick="editP(${i})">Editar</button><br>`;
 });
 adminList.innerHTML=html;
@@ -206,29 +246,14 @@ precio.value=products[i].price;
 desc.value=products[i].desc;
 }
 
-function addExtra(){
-extrasTemp.push({name:extraNombre.value,price:parseInt(extraPrecio.value)});
-let html="";
-extrasTemp.forEach(e=>html+=`${e.name} +$${e.price}<br>`);
-listaExtras.innerHTML=html;
-}
-
-function addProduct(){
-products.push({
-name:nombre.value,
-price:parseInt(precio.value),
-desc:desc.value,
-img:"https://images.unsplash.com/photo-1550547660-d9450f859349",
-extras:extrasTemp,
-active:true
+// GEO
+function getLocation(){
+navigator.geolocation.getCurrentPosition(pos=>{
+ubicacion=`https://maps.google.com?q=${pos.coords.latitude},${pos.coords.longitude}`;
 });
-extrasTemp=[];
-listaExtras.innerHTML="";
-renderProducts();
-renderAdmin();
 }
 
-// WHATS CON CAMBIO
+// WHATS
 function sendWhatsApp(){
 let msg="Pedido:%0A";
 let total=0;
@@ -245,22 +270,16 @@ msg+=`Total: $${total}%0A`;
 msg+=`Pagará con: $${pago}%0A`;
 msg+=`Cambio: $${cambioFinal}%0A`;
 msg+=`Método: ${metodoPago.value}%0A`;
+msg+=`Ubicación: ${ubicacion}%0A`;
 msg+=`Dirección: ${direccion.value}`;
 
 window.open("https://wa.me/5215550572742?text="+msg);
 }
 
 // INSTALL
-let deferredPrompt;
-window.addEventListener("beforeinstallprompt",(e)=>{
-e.preventDefault();
-deferredPrompt=e;
-});
-
-installBtn.addEventListener("click",()=>{
-if(deferredPrompt){deferredPrompt.prompt();}
-else{alert("📲 Agrégame a tu pantalla de inicio");}
-});
+installBtn.onclick=()=>{
+alert("📲 Agrégame a tu pantalla de inicio\n\nInstrucciones:\nCompartir 📤\nLuego: Agregar a pantalla de inicio");
+};
 
 </script>
 
