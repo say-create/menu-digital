@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Smash House</title>
 
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#000000">
-
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
@@ -27,9 +24,9 @@ z-index:-1;
 
 <body class="text-white font-sans">
 
-<!-- VIDEO -->
-<video autoplay muted loop class="video-bg">
-<source src="https://cdn.coverr.co/videos/coverr-burger-on-grill-1578/1080p.mp4">
+<!-- VIDEO (CORREGIDO) -->
+<video autoplay muted loop playsinline class="video-bg">
+<source src="https://cdn.coverr.co/videos/coverr-cooking-burger-over-fire-4933/1080p.mp4" type="video/mp4">
 </video>
 
 <!-- INICIO -->
@@ -45,10 +42,9 @@ z-index:-1;
 <h1 class="text-2xl">🍔 Menú</h1>
 </div>
 
-<!-- INFO -->
 <div class="p-3 text-center bg-black bg-opacity-70 text-sm">
-⭐ 4.8 (320 reseñas) <br>
-📍 Ecatepec, México <br>
+⭐ 4.8 (320 reseñas)<br>
+📍 Ecatepec, México<br>
 💬 “Las mejores burgers 🔥”
 </div>
 
@@ -87,7 +83,7 @@ z-index:-1;
 
 </div>
 
-<!-- MODAL PRODUCTO -->
+<!-- MODAL -->
 <div id="modal" class="fixed inset-0 bg-black bg-opacity-90 hidden flex items-center justify-center">
 <div class="bg-gray-900 p-4 rounded w-11/12">
 <h2 id="modalName"></h2>
@@ -110,13 +106,11 @@ z-index:-1;
 
 <!-- PANEL -->
 <div id="adminPanel" class="fixed inset-0 bg-black hidden p-4 overflow-y-auto">
-
 <h2>Panel Admin</h2>
 
 <input id="nombre" placeholder="Nombre" class="w-full text-black mb-2">
 <input id="precio" type="number" placeholder="Precio" class="w-full text-black mb-2">
 <input id="desc" placeholder="Descripción" class="w-full text-black mb-2">
-<input type="file" id="imgFile" class="mb-2">
 
 <select id="cat" class="w-full text-black mb-2">
 <option value="burgers">Burgers</option>
@@ -136,27 +130,25 @@ z-index:-1;
 
 let PASSWORD="1234";
 
-// PRODUCTOS
 let products = JSON.parse(localStorage.getItem("products")) || [
 {category:"burgers",name:"Clásica",price:90,desc:"Queso",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd",active:true},
 {category:"tacos",name:"Pastor",price:70,desc:"Con piña",img:"https://images.unsplash.com/photo-1600891964599-f61ba0e24092",active:true},
 {category:"bebidas",name:"Refresco",price:25,desc:"600ml",img:"https://images.unsplash.com/photo-1581006852262-e4307cf6283a",active:true}
 ];
 
-// COMPLETAR A 25
 while(products.length<25){
 products.push({...products[products.length%3],name:products[products.length%3].name+" "+products.length,active:true});
 }
 
 let cart=[];
-let editIndex=null;
-let ubicacion="";
 let selectedProduct=null;
+let ubicacion="";
+let editIndex=null;
 
 // ENTRAR
 function enterMenu(){
-home.style.display="none";
-menu.classList.remove("hidden");
+document.getElementById("home").style.display="none";
+document.getElementById("menu").classList.remove("hidden");
 renderProducts();
 }
 
@@ -179,12 +171,13 @@ document.getElementById("products").innerHTML=html;
 // MODAL
 function openModal(i){
 selectedProduct=products[i];
-modal.classList.remove("hidden");
 
-modalName.innerText=selectedProduct.name;
-modalDesc.innerText=selectedProduct.desc;
+document.getElementById("modal").classList.remove("hidden");
 
-extras.innerHTML=`
+document.getElementById("modalName").innerText=selectedProduct.name;
+document.getElementById("modalDesc").innerText=selectedProduct.desc;
+
+document.getElementById("extras").innerHTML=`
 <label><input type="checkbox" value="queso"> Queso +$15</label><br>
 <label><input type="checkbox" value="tocino"> Tocino +$20</label><br>
 <label><input type="checkbox" value="carne"> Extra carne +$30</label>
@@ -192,7 +185,7 @@ extras.innerHTML=`
 }
 
 function closeModal(){
-modal.classList.add("hidden");
+document.getElementById("modal").classList.add("hidden");
 }
 
 function confirmAdd(){
@@ -222,13 +215,13 @@ html+=`${p.name} $${p.price}<br>`;
 total+=p.price;
 });
 
-cartItems.innerHTML=html;
-totalEl.innerText="$"+total;
-count.innerText=cart.length;
+document.getElementById("cartItems").innerHTML=html;
+document.getElementById("total").innerText="$"+total;
+document.getElementById("count").innerText=cart.length;
 }
 
 function toggleCart(){
-cartPanel.classList.toggle("hidden");
+document.getElementById("cartPanel").classList.toggle("hidden");
 }
 
 // UBICACIÓN
