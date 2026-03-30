@@ -24,7 +24,6 @@ class="fixed bottom-20 left-4 bg-green-500 text-white px-3 py-2 rounded-full sha
 style="pointer-events:auto;">
 📲
 </button>
-
 <div class="fallback"></div>
 
 <video autoplay muted loop playsinline class="video-bg">
@@ -35,7 +34,10 @@ style="pointer-events:auto;">
 <div id="home" class="h-screen flex flex-col justify-center items-center glass">
 <h1 class="text-5xl font-bold mb-4">🔥 Smash House</h1>
 <p class="mb-4">Las burgers más brutales de tu zona 🍔</p>
-<button onclick="enterMenu()" class="bg-yellow-500 px-6 py-3 rounded text-black">Ver menú</button>
+<button onclick="document.getElementById('home').style.display='none';document.getElementById('menu').classList.remove('hidden');"
+class="bg-yellow-500 px-6 py-3 rounded text-black">
+Ver menú
+</button>
 </div>
 
 <!-- MENU -->
