@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Smash House</title>
 
 <link rel="manifest" href="manifest.json">
@@ -12,35 +11,46 @@
 <script src="https://cdn.tailwindcss.com"></script>
 
 <style>
-body{
-  background: radial-gradient(circle at top,#ff3c00,#000);
+body{margin:0}
+.video-bg{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+object-fit:cover;
+z-index:-1;
 }
-.card:hover{
-transform: scale(1.03);
-transition: 0.3s;
-}
+.card:hover{transform:scale(1.05);transition:0.3s;}
 </style>
 </head>
 
 <body class="text-white font-sans">
 
-<div class="p-4 text-center bg-black">
-<h1 class="text-2xl font-bold">🔥 Smash House</h1>
-<p class="text-yellow-400">⭐⭐⭐⭐⭐ 4.8 (320 reseñas)</p>
+<!-- VIDEO FONDO -->
+<video autoplay muted loop class="video-bg">
+<source src="https://cdn.coverr.co/videos/coverr-grilling-burger-5171/1080p.mp4">
+</video>
+
+<!-- PANTALLA INICIO -->
+<div id="home" class="h-screen flex flex-col justify-center items-center bg-black bg-opacity-60">
+<h1 class="text-4xl font-bold mb-4">🔥 Smash House</h1>
+<button onclick="enterMenu()" class="bg-yellow-500 px-6 py-3 rounded text-black">
+Ver menú
+</button>
+</div>
+
+<!-- MENÚ -->
+<div id="menu" class="hidden">
+
+<div class="p-4 text-center bg-black bg-opacity-80">
+<h1 class="text-2xl">🍔 Menú</h1>
 </div>
 
 <button onclick="showLogin()" class="fixed top-5 right-5 bg-yellow-500 px-3 py-1 rounded">⚙️</button>
 
-<!-- LOGIN -->
-<div id="loginBox" class="fixed inset-0 bg-black hidden flex items-center justify-center">
-<div class="bg-gray-900 p-6 rounded">
-<input id="passInput" type="password" placeholder="Contraseña" class="p-2 text-black">
-<button onclick="login()" class="bg-green-500 p-2 w-full mt-2">Entrar</button>
-</div>
-</div>
-
 <!-- CATEGORÍAS -->
-<div class="flex gap-2 p-3 overflow-x-auto">
+<div class="flex gap-2 p-3 overflow-x-auto bg-black bg-opacity-70">
 <button onclick="renderProducts('all')" class="bg-yellow-500 px-3 py-1 rounded-full">Todo</button>
 <button onclick="renderProducts('burgers')" class="bg-gray-800 px-3 py-1 rounded-full">🍔</button>
 <button onclick="renderProducts('tacos')" class="bg-gray-800 px-3 py-1 rounded-full">🌮</button>
@@ -59,7 +69,6 @@ transition: 0.3s;
 </div>
 
 <div id="cartPanel" class="fixed bottom-0 left-0 right-0 bg-black p-4 hidden max-h-[70vh] overflow-y-auto">
-
 <h2>Tu pedido</h2>
 <div id="cartItems"></div>
 <p id="total"></p>
@@ -68,13 +77,21 @@ transition: 0.3s;
 <input id="direccion" placeholder="Dirección" class="w-full text-black mt-2">
 
 <button onclick="sendWhatsApp()" class="bg-green-500 w-full mt-2">Enviar pedido</button>
+</div>
 
 </div>
 
-<!-- PANEL -->
-<div id="adminPanel" class="fixed inset-0 bg-black hidden p-4 overflow-y-auto">
+<!-- LOGIN -->
+<div id="loginBox" class="fixed inset-0 bg-black hidden flex items-center justify-center">
+<div class="bg-gray-900 p-6 rounded">
+<input id="passInput" type="password" placeholder="Contraseña" class="p-2 text-black">
+<button onclick="login()" class="bg-green-500 w-full mt-2 p-2">Entrar</button>
+</div>
+</div>
 
-<h2>Panel</h2>
+<!-- PANEL ADMIN -->
+<div id="adminPanel" class="fixed inset-0 bg-black hidden p-4 overflow-y-auto">
+<h2 class="text-xl mb-3">Panel Admin</h2>
 
 <input id="nombre" placeholder="Nombre" class="w-full text-black mb-2">
 <input id="precio" type="number" placeholder="Precio" class="w-full text-black mb-2">
@@ -93,67 +110,181 @@ transition: 0.3s;
 <button onclick="closeAdmin()" class="bg-red-500 w-full mb-2">Cerrar</button>
 
 <div id="adminList"></div>
-
-<h3 class="mt-4">Pedidos</h3>
-<div id="ordersList"></div>
-
 </div>
 
 <script>
 
 let PASSWORD="1234";
 
-// 🔥 25+ PRODUCTOS REALES
+// 25 PRODUCTOS
 let products = JSON.parse(localStorage.getItem("products")) || [
-
-{category:"burgers",name:"Smash Clásica",price:90,desc:"Carne y queso",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd"},
-{category:"burgers",name:"Doble Smash",price:120,desc:"Doble carne",img:"https://images.unsplash.com/photo-1550547660-d9450f859349"},
-{category:"burgers",name:"BBQ Bacon",price:130,desc:"BBQ y tocino",img:"https://images.unsplash.com/photo-1606755962773-d324e0a13086"},
-{category:"burgers",name:"Cheese Burger",price:95,desc:"Extra queso",img:"https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5"},
-{category:"burgers",name:"Monster Burger",price:150,desc:"Gigante",img:"https://images.unsplash.com/photo-1600891964599-f61ba0e24092"},
-
-{category:"tacos",name:"Tacos al pastor",price:70,desc:"Con piña",img:"https://images.unsplash.com/photo-1600891964599-f61ba0e24092"},
-{category:"tacos",name:"Tacos de bistec",price:80,desc:"Jugosos",img:"https://images.unsplash.com/photo-1617196034796-73dfa7b1fd56"},
-{category:"tacos",name:"Tacos campechanos",price:85,desc:"Mixtos",img:"https://images.unsplash.com/photo-1613145993514-5d0d1a5d3a29"},
-{category:"tacos",name:"Gringas",price:90,desc:"Queso y carne",img:"https://images.unsplash.com/photo-1625944190194-8c5b53c06f16"},
-{category:"tacos",name:"Volcanes",price:95,desc:"Crujientes",img:"https://images.unsplash.com/photo-1626700051175-6818013e1d4f"},
-
-{category:"papas",name:"Papas clásicas",price:50,desc:"Crujientes",img:"https://images.unsplash.com/photo-1576107232684-1279f390859f"},
-{category:"papas",name:"Papas con queso",price:65,desc:"Cheddar",img:"https://images.unsplash.com/photo-1585238342028-4c4bdfd0c4d3"},
-{category:"papas",name:"Papas BBQ",price:70,desc:"Salsa BBQ",img:"https://images.unsplash.com/photo-1586190848861-99aa4a171e90"},
-{category:"papas",name:"Papas supremas",price:85,desc:"Todo incluido",img:"https://images.unsplash.com/photo-1606755456206-b25206cde27e"},
-
-{category:"bebidas",name:"Refresco",price:25,desc:"600ml",img:"https://images.unsplash.com/photo-1581006852262-e4307cf6283a"},
-{category:"bebidas",name:"Agua",price:20,desc:"Natural",img:"https://images.unsplash.com/photo-1523362628745-0c100150b504"},
-{category:"bebidas",name:"Malteada chocolate",price:60,desc:"Deliciosa",img:"https://images.unsplash.com/photo-1572490122747-3968b75cc699"},
-{category:"bebidas",name:"Malteada fresa",price:60,desc:"Fresca",img:"https://images.unsplash.com/photo-1551024601-bec78aea704b"},
-
-{category:"postres",name:"Brownie",price:45,desc:"Chocolate",img:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c"},
-{category:"postres",name:"Cheesecake",price:55,desc:"Fresa",img:"https://images.unsplash.com/photo-1578985545062-69928b1d9587"},
-{category:"postres",name:"Donas",price:35,desc:"Dulces",img:"https://images.unsplash.com/photo-1509042239860-f550ce710b93"},
-{category:"postres",name:"Helado",price:40,desc:"Vainilla",img:"https://images.unsplash.com/photo-1563805042-7684c019e1cb"}
-
+{category:"burgers",name:"Clásica",price:90,desc:"Queso",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd",active:true},
+{category:"burgers",name:"Doble",price:120,desc:"Doble carne",img:"https://images.unsplash.com/photo-1550547660-d9450f859349",active:true},
+{category:"tacos",name:"Pastor",price:70,desc:"Con piña",img:"https://images.unsplash.com/photo-1600891964599-f61ba0e24092",active:true},
+{category:"papas",name:"Papas clásicas",price:50,desc:"Crujientes",img:"https://images.unsplash.com/photo-1576107232684-1279f390859f",active:true},
+{category:"bebidas",name:"Refresco",price:25,desc:"600ml",img:"https://images.unsplash.com/photo-1581006852262-e4307cf6283a",active:true},
+{category:"postres",name:"Brownie",price:45,desc:"Chocolate",img:"https://images.unsplash.com/photo-1606313564200-e75d5e30476c",active:true}
 ];
 
+// DUPLICAR HASTA 25
+while(products.length<25){
+products.push({...products[products.length%6],name:products[products.length%6].name+" "+products.length,active:true});
+}
+
 let cart=[];
-let orders = JSON.parse(localStorage.getItem("orders")) || [];
 let editIndex=null;
 let ubicacion="";
+
+// ENTRAR
+function enterMenu(){
+home.style.display="none";
+menu.classList.remove("hidden");
+renderProducts();
+}
 
 // RENDER
 function renderProducts(cat="all"){
 let html="";
 products.forEach((p,i)=>{
-if(cat==="all"||p.category===cat){
+if((cat==="all"||p.category===cat) && p.active){
 html+=`
-<div onclick="addToCart(${i})" class="card bg-gray-900 p-3 rounded">
+<div onclick="addToCart(${i})" class="card bg-black bg-opacity-70 p-3 rounded">
 <img src="${p.img}" class="w-full h-32 object-cover">
 <h3>${p.name}</h3>
 <p>$${p.price}</p>
 </div>`;
 }
 });
-productsDiv.innerHTML=html;
+products.innerHTML=html;
+document.getElementById("products").innerHTML=html;
 }
 
-// RESTO DEL CÓDIGO IGUAL (carrito, admin, etc.)
+// CARRITO
+function addToCart(i){
+cart.push(products[i]);
+updateCart();
+}
+
+function updateCart(){
+let html="";
+let total=0;
+cart.forEach(p=>{
+html+=`${p.name} $${p.price}<br>`;
+total+=p.price;
+});
+cartItems.innerHTML=html;
+totalEl.innerText="$"+total;
+count.innerText=cart.length;
+}
+
+// UBICACIÓN
+function getLocation(){
+navigator.geolocation.getCurrentPosition(pos=>{
+ubicacion=`https://maps.google.com?q=${pos.coords.latitude},${pos.coords.longitude}`;
+alert("Ubicación lista 📍");
+});
+}
+
+// WHATS
+function sendWhatsApp(){
+let msg="Pedido:%0A";
+cart.forEach(p=>msg+=`${p.name} $${p.price}%0A`);
+msg+=`%0A${direccion.value}`;
+msg+=`%0A${ubicacion}`;
+window.open("https://wa.me/5215550572742?text="+msg);
+}
+
+// ADMIN
+function showLogin(){loginBox.classList.remove("hidden");}
+
+function login(){
+if(passInput.value===PASSWORD){
+loginBox.classList.add("hidden");
+adminPanel.classList.remove("hidden");
+renderAdmin();
+}
+}
+
+function renderAdmin(){
+let html="";
+products.forEach((p,i)=>{
+html+=`
+<div class="bg-gray-800 p-2 mb-2">
+${p.name}
+<button onclick="editProduct(${i})">✏️</button>
+<button onclick="toggleActive(${i})">${p.active?"❌":"✔️"}</button>
+<button onclick="deleteProduct(${i})">🗑️</button>
+</div>`;
+});
+adminList.innerHTML=html;
+}
+
+function toggleActive(i){
+products[i].active=!products[i].active;
+save();
+renderProducts();
+renderAdmin();
+}
+
+function deleteProduct(i){
+products.splice(i,1);
+save();
+renderProducts();
+renderAdmin();
+}
+
+function editProduct(i){
+let p=products[i];
+nombre.value=p.name;
+precio.value=p.price;
+desc.value=p.desc;
+cat.value=p.category;
+editIndex=i;
+}
+
+async function saveProduct(){
+let imgData=products[editIndex]?.img || "";
+
+if(imgFile.files[0]){
+let reader=new FileReader();
+reader.onload=()=>{imgData=reader.result;saveFinal(imgData);}
+reader.readAsDataURL(imgFile.files[0]);
+}else{
+saveFinal(imgData);
+}
+}
+
+function saveFinal(imgData){
+let p={
+name:nombre.value,
+price:parseInt(precio.value),
+desc:desc.value,
+img:imgData,
+category:cat.value,
+active:true
+};
+
+if(editIndex!==null){
+products[editIndex]=p;
+}else{
+products.push(p);
+}
+
+save();
+renderProducts();
+renderAdmin();
+editIndex=null;
+}
+
+function save(){
+localStorage.setItem("products",JSON.stringify(products));
+}
+
+function closeAdmin(){
+adminPanel.classList.add("hidden");
+}
+
+</script>
+
+</body>
+</html>
